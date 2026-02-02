@@ -1,5 +1,54 @@
 package model
 
+type BehaviorSummary struct {
+	ID       string `json:"id" bson:"id"`
+	From     int64  `json:"from" bson:"from"`
+	To       int64  `json:"to" bson:"to"`
+	Count    int    `json:"count" bson:"count"`
+	Key      string `json:"key" bson:"key"`
+	KeyType  string `json:"keyType,omitempty" bson:"keyType,omitempty"`
+	DayIndex string `json:"dayIndex,omitempty" bson:"dayIndex,omitempty"`
+	Interval string `json:"interval,omitempty" bson:"interval,omitempty"`
+
+	BehaviorRules []string `json:"behaviorRules" bson:"behaviorRules"`
+	Behaviors     []string `json:"behaviors" bson:"behaviors"`
+	Risks         []string `json:"risks,omitempty" bson:"risks,omitempty"`
+	RiskScore     int      `json:"riskScore" bson:"riskScore"`
+	MitreTags     []string `json:"mitreTags,omitempty" bson:"mitreTags,omitempty"`
+
+	SummaryList []*BehaviorRuleSummary `json:"summaryList,omitempty" bson:"summaryList,omitempty"`
+	// Slots       []*TimeSlotSummary     `json:"slots,omitempty" bson:"slots,omitempty"`
+
+	ScoreLevel string `json:"scoreLevel" bson:"scoreLevel"`
+
+	// KeyContext *recommend.EntityContext `json:"keyContext" bson:"keyContext"`
+
+	// incident management
+	Comments    []*UserComment `json:"comments" bson:"comments"`
+	Status      string         `json:"status,omitempty" bson:"status,omitempty"`
+	Incident    bool           `json:"incident" bson:"incident"`
+	ScoreAdjust int            `json:"scoreAdjust"`
+	UpdatedOn   int64          `json:"updatedOn" bson:"updatedOn"`
+
+	NotifyFlag bool `json:"-"`
+
+	// Investigations []*Investigation `json:"investigations,omitempty" bson:"investigations,omitempty"`
+
+	// openAI embedding APIs
+	VectorData      []float64 `json:"vectorData,omitempty" bson:"vectorData,omitempty"`
+	FingerprintHash string    `json:"fingerprintHash,omitempty" bson:"fingerprintHash,omitempty"`
+	Fingerprint     string    `json:"fingerprint,omitempty" bson:"fingerprint,omitempty"`
+	RuleFP          string    `json:"ruleFP,omitempty" bson:"ruleFP,omitempty"`
+}
+
+type UserComment struct {
+	Content  string   `json:"content"`
+	Actions  []string `json:"actions"`
+	Username string   `json:"username"`
+	// NewState  string    `json:"newState"`
+	CreatedOn int64 `json:"createdOn"`
+}
+
 type BehaviorRuleSummary struct {
 	BehaviorRule       string                `json:"behaviorRule" bson:"behaviorRule"`
 	Behavior           string                `json:"behavior" bson:"behavior"`

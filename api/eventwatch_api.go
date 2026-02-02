@@ -45,6 +45,32 @@ func (s *EventWatchService) SummarySearch(searchString string, rangeFrom, rangeT
 	return &resp, nil
 }
 
+// TimelineSearch calls /api/ds/fsm_behavior_search with the given search string and time range.
+func (s *EventWatchService) TimelineSearch(searchString string, rangeFrom, rangeTo int64) (*model.ElasticSearchResult, error) {
+	req := &ElasticSearchRequest{
+		Options: &SimpleSearchOption{
+			SearchStr: searchString,
+			RangeFrom: rangeFrom,
+			RangeTo:   rangeTo,
+			RangeField: "timestamp",
+			FetchLimit: 100,
+			FetchOffset: 0,
+			SortField: "timestamp",
+			SortOrder: "desc",
+			Facets: &FacetsOption{
+				Facets: []*FacetEntry{},
+				MustFilters: []*FilterEntry{},
+				MustNotFilters: []*FilterEntry{},
+			},
+		},
+	}
+	var resp model.ElasticSearchResult
+	if err := s.call("fsm_behavior_search", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
 type ElasticSearchRequest struct {
 	Options *SimpleSearchOption `json:"options,omitempty"`
 }

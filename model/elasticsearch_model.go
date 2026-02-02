@@ -28,7 +28,7 @@ type SearchResultCluster struct {
 }
 
 type SearchHits struct {
-	TotalHits int64   `json:"total"`     // total number of hits found
+	// TotalHits int64   `json:"total"`     // total number of hits found
 	// TotalHits *TotalHits   `json:"total,omitempty"`     // total number of hits found
 	MaxScore  *float64     `json:"max_score,omitempty"` // maximum score of all hits
 	Hits      []*elastic.SearchHit `json:"hits,omitempty"`      // the actual hits returned
