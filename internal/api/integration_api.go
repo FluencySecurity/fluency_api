@@ -3,13 +3,13 @@ package api
 import (
 	"fmt"
 
-	ingextAPI "github.com/SecurityDo/ingext_api/api"
-	model "github.com/SecurityDo/ingext_api/model"
+	fluencyAPI "github.com/SecurityDo/fluency_api/api"
+	model "github.com/SecurityDo/fluency_api/model"
 )
 
 func (c *Client) AddIntegration(entry *model.Integration) (id string, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	id, err = platformService.AddIntegration(entry)
 
@@ -22,7 +22,7 @@ func (c *Client) AddIntegration(entry *model.Integration) (id string, err error)
 
 func (c *Client) DeleteIntegration(id string) (err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	err = platformService.DeleteIntegration(id)
 
@@ -35,7 +35,7 @@ func (c *Client) DeleteIntegration(id string) (err error) {
 
 func (c *Client) ListIntegration() (entries []*model.Integration, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	entries, err = platformService.ListIntegrations()
 

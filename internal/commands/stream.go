@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	model "github.com/SecurityDo/ingext_api/model"
+	model "github.com/SecurityDo/fluency_api/model"
 	"github.com/spf13/cobra"
 )
 

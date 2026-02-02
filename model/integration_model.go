@@ -581,7 +581,7 @@ type DataLakeConfig struct {
 	// integration id of cloud storage (s3)
 	StorageIntegration string `json:"storageIntegration" yaml:"storageIntegration"`
 	Index              string `json:"index" yaml:"index"`
-	// "ingext default"  or  "elastic/opensearch"  or "k8s logs"
+	// "fluency default"  or  "elastic/opensearch"  or "k8s logs"
 	SchemaName string `json:"schemaName" yaml:"schemaName"`
 	Schema     string `json:"schema" yaml:"schema"`
 	// default is 200MB

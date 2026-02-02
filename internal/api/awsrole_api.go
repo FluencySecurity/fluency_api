@@ -3,13 +3,13 @@ package api
 import (
 	"fmt"
 
-	ingextAPI "github.com/SecurityDo/ingext_api/api"
-	"github.com/SecurityDo/ingext_api/model"
+	fluencyAPI "github.com/SecurityDo/fluency_api/api"
+	"github.com/SecurityDo/fluency_api/model"
 )
 
 func (c *Client) GetPodRole() (role, arn string, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	role, arn, err = platformService.GetPodRole()
 
@@ -23,7 +23,7 @@ func (c *Client) GetPodRole() (role, arn string, err error) {
 
 func (c *Client) TestAssumedRole(roleARN, roleExternalID string) (err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	err = platformService.TestAssumedRole(roleARN, roleExternalID)
 
@@ -35,7 +35,7 @@ func (c *Client) TestAssumedRole(roleARN, roleExternalID string) (err error) {
 }
 func (c *Client) AddAssumedRole(roleName, roleARN, roleExternalID string) (id string, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	id, err = platformService.AddAssumedRole(roleName, roleARN, roleExternalID)
 
@@ -48,7 +48,7 @@ func (c *Client) AddAssumedRole(roleName, roleARN, roleExternalID string) (id st
 
 func (c *Client) DeleteAssumedRole(roleID string) (err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	err = platformService.DeleteAssumedRole(roleID)
 
@@ -61,7 +61,7 @@ func (c *Client) DeleteAssumedRole(roleID string) (err error) {
 
 func (c *Client) ListAssumedRole() (roles []*model.InstanceRole, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	roles, err = platformService.ListAssumedRole()
 

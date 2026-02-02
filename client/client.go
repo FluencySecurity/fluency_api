@@ -12,7 +12,7 @@ import (
 	"os"
 	"time"
 
-	fsb "github.com/SecurityDo/ingext_api/fsb"
+	fsb "github.com/SecurityDo/fluency_api/fsb"
 )
 
 type HTTPService struct {
@@ -135,18 +135,18 @@ func (r *HTTPService) Call(prefix string, functionName string, input interface{}
 
 }
 
-type IngextClient struct {
+type FluencyClient struct {
 	serviceClient *HTTPService
 	logger        *slog.Logger
 }
 
-func NewIngextClient(siteURL string, token string, debugFlag bool, logger *slog.Logger) *IngextClient {
+func NewFluencyClient(siteURL string, token string, debugFlag bool, logger *slog.Logger) *FluencyClient {
 	if logger == nil {
 		// Using os.Stderr by default is safe for libraries
 		logger = slog.New(slog.NewTextHandler(os.Stderr, nil))
 	}
 
-	s := &IngextClient{
+	s := &FluencyClient{
 		serviceClient: NewHTTPService(siteURL, logger),
 		logger:        logger,
 	}
@@ -157,7 +157,7 @@ func NewIngextClient(siteURL string, token string, debugFlag bool, logger *slog.
 
 }
 
-func (r *IngextClient) GenericCall(prefix string, functionName string, x interface{}) (res *fsb.JNode, err error) {
+func (r *FluencyClient) GenericCall(prefix string, functionName string, x interface{}) (res *fsb.JNode, err error) {
 	res, err = r.serviceClient.Call(prefix, functionName, x)
 
 	if err != nil {

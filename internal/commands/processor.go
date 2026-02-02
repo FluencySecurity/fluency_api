@@ -45,9 +45,9 @@ var processorAddCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a processor",
 	// Example usage:
-	// 1. ingext processor add --name my-proc --content "@./my-script.js"
-	// 2. ingext processor add --name my-proc --content "function process() { ... }"
-	// 3. cat my-script.js | ingext processor add --name my-proc --content -
+	// 1. fluency processor add --name my-proc --content "@./my-script.js"
+	// 2. fluency processor add --name my-proc --content "function process() { ... }"
+	// 3. cat my-script.js | fluency processor add --name my-proc --content -
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var content string
 		//var err error
@@ -107,8 +107,8 @@ var processorDelCmd = &cobra.Command{
 	},
 }
 
-// ingext processor add --name filter --content "@./scripts/filter.js"
-// echo "function process() { ... }" | ingext processor add --name filter --content -
+// fluency processor add --name filter --content "@./scripts/filter.js"
+// echo "function process() { ... }" | fluency processor add --name filter --content -
 func init() {
 	RootCmd.AddCommand(processorCmd)
 	processorCmd.AddCommand(processorAddCmd, listProcessorCmd, processorDelCmd) // Add del similarly

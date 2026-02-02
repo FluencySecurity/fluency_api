@@ -6,21 +6,21 @@ import (
 	"os"
 	"time"
 
-	"github.com/SecurityDo/ingext_api/client"
-	"github.com/SecurityDo/ingext_api/model"
+	"github.com/SecurityDo/fluency_api/client"
+	"github.com/SecurityDo/fluency_api/model"
 )
 
 // PlatformService provides helpers for calling platform_* endpoints.
 type PlatformService struct {
-	client *client.IngextClient
+	client *client.FluencyClient
 }
 
 // NewPlatformService constructs a PlatformService instance backed by the provided client.
-func NewPlatformService(client *client.IngextClient) *PlatformService {
+func NewPlatformService(client *client.FluencyClient) *PlatformService {
 	return &PlatformService{client: client}
 }
 
-func ApiCall(client *client.IngextClient, function string, payload interface{}, out interface{}) error {
+func ApiCall(client *client.FluencyClient, function string, payload interface{}, out interface{}) error {
 	res, err := client.GenericCall("api/ds", function, payload)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error calling %s: %v\n", function, err.Error())

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/SecurityDo/ingext_api/internal/commands"
+	"github.com/SecurityDo/fluency_api/internal/commands"
 )
 
 func main() {

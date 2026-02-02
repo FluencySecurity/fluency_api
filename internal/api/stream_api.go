@@ -3,14 +3,14 @@ package api
 import (
 	"fmt"
 
-	"github.com/SecurityDo/ingext_api/api"
-	ingextAPI "github.com/SecurityDo/ingext_api/api"
-	model "github.com/SecurityDo/ingext_api/model"
+	"github.com/SecurityDo/fluency_api/api"
+	fluencyAPI "github.com/SecurityDo/fluency_api/api"
+	model "github.com/SecurityDo/fluency_api/model"
 )
 
-func (c *Client) AddDataSource(source *model.DataSourceConfig) (resp *ingextAPI.AddDataSourceResponse, err error) {
+func (c *Client) AddDataSource(source *model.DataSourceConfig) (resp *fluencyAPI.AddDataSourceResponse, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	resp, err = platformService.AddDataSource(source)
 
@@ -23,7 +23,7 @@ func (c *Client) AddDataSource(source *model.DataSourceConfig) (resp *ingextAPI.
 
 func (c *Client) DeleteDataSource(id string) (err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	err = platformService.DeleteDataSource(id)
 
@@ -36,7 +36,7 @@ func (c *Client) DeleteDataSource(id string) (err error) {
 
 func (c *Client) ListDataSource() (entries []*model.DataSourceConfig, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	entries, err = platformService.ListDataSource()
 
@@ -47,9 +47,9 @@ func (c *Client) ListDataSource() (entries []*model.DataSourceConfig, err error)
 	return entries, nil
 }
 
-func (c *Client) AddDataSink(sink *model.DataSinkConfig) (resp *ingextAPI.AddDataSinkResponse, err error) {
+func (c *Client) AddDataSink(sink *model.DataSinkConfig) (resp *fluencyAPI.AddDataSinkResponse, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	resp, err = platformService.AddDataSink(sink)
 
@@ -62,7 +62,7 @@ func (c *Client) AddDataSink(sink *model.DataSinkConfig) (resp *ingextAPI.AddDat
 
 func (c *Client) DeleteDataSink(id string) (err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	err = platformService.DeleteDataSink(id)
 
@@ -75,7 +75,7 @@ func (c *Client) DeleteDataSink(id string) (err error) {
 
 func (c *Client) ListDataSink() (entries []*model.DataSinkConfig, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	entries, err = platformService.ListDataSink()
 
@@ -88,7 +88,7 @@ func (c *Client) ListDataSink() (entries []*model.DataSinkConfig, err error) {
 
 func (c *Client) AddRouter(routerConfig *model.RouterConfig) (id string, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	resp, err := platformService.AddRouter(routerConfig)
 
@@ -101,7 +101,7 @@ func (c *Client) AddRouter(routerConfig *model.RouterConfig) (id string, err err
 
 func (c *Client) AddSimpleRouter(processorName string, routerName string) (id string, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	id, err = platformService.AddSimpleRouter(processorName, routerName)
 
@@ -114,7 +114,7 @@ func (c *Client) AddSimpleRouter(processorName string, routerName string) (id st
 
 func (c *Client) SetRouterSink(routerID, sinkID string) (err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	result, err := platformService.GetRouter(routerID)
 
@@ -152,7 +152,7 @@ func (c *Client) SetRouterSink(routerID, sinkID string) (err error) {
 
 func (c *Client) SetSourceRouter(sourceID, routerID string) (err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	err = platformService.SetDataSourceRouter(&api.SourceSetRouterReq{
 		DataSourceID: sourceID,
@@ -169,7 +169,7 @@ func (c *Client) SetSourceRouter(sourceID, routerID string) (err error) {
 /*
 func (c *Client) AddPipe(routerConfig *model.StreamPipeConfig) (id string, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	resp, err := platformService.AddRouter(routerConfig)
 

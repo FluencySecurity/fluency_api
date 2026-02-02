@@ -121,7 +121,7 @@ func init() {
 	// Flags for 'lake add index'
 	lakeAddIndexCmd.Flags().StringVar(&datalake, "datalake", "managed", "datalake name")
 	lakeAddIndexCmd.Flags().StringVar(&index, "index", "", "datalake index name")
-	lakeAddIndexCmd.Flags().StringVar(&schema, "schema", "ingext default", "schema name")
+	lakeAddIndexCmd.Flags().StringVar(&schema, "schema", "fluency default", "schema name")
 
 	//_ = lakeAddIndexCmd.MarkFlagRequired("datalake")
 	_ = lakeAddIndexCmd.MarkFlagRequired("index")

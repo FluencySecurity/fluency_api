@@ -3,13 +3,13 @@ package api
 import (
 	"fmt"
 
-	ingextAPI "github.com/SecurityDo/ingext_api/api"
-	"github.com/SecurityDo/ingext_api/model"
+	fluencyAPI "github.com/SecurityDo/fluency_api/api"
+	"github.com/SecurityDo/fluency_api/model"
 )
 
 func (c *Client) ListDatalakes() (entries []*model.Datalake, err error) {
 
-	datalakeService := ingextAPI.NewDatalakeService(c.ingextClient)
+	datalakeService := fluencyAPI.NewDatalakeService(c.fluencyClient)
 
 	resp, err := datalakeService.ListDatalake()
 
@@ -22,7 +22,7 @@ func (c *Client) ListDatalakes() (entries []*model.Datalake, err error) {
 
 func (c *Client) AddDatalake(name string, managed bool, integrationID string) (err error) {
 
-	datalakeService := ingextAPI.NewDatalakeService(c.ingextClient)
+	datalakeService := fluencyAPI.NewDatalakeService(c.fluencyClient)
 
 	err = datalakeService.AddDatalake(name, managed, integrationID)
 
@@ -35,7 +35,7 @@ func (c *Client) AddDatalake(name string, managed bool, integrationID string) (e
 
 func (c *Client) AddDatalakeIndex(lake, index string, schema string) (err error) {
 
-	datalakeService := ingextAPI.NewDatalakeService(c.ingextClient)
+	datalakeService := fluencyAPI.NewDatalakeService(c.fluencyClient)
 
 	err = datalakeService.AddDatalakeIndex(lake, index, schema)
 
@@ -48,7 +48,7 @@ func (c *Client) AddDatalakeIndex(lake, index string, schema string) (err error)
 
 func (c *Client) ListDatalakeIndex(lake string) (entries []*model.DatalakeIndex, err error) {
 
-	datalakeService := ingextAPI.NewDatalakeService(c.ingextClient)
+	datalakeService := fluencyAPI.NewDatalakeService(c.fluencyClient)
 
 	entries, err = datalakeService.ListDatalakeIndex(lake)
 
@@ -61,7 +61,7 @@ func (c *Client) ListDatalakeIndex(lake string) (entries []*model.DatalakeIndex,
 
 func (c *Client) DeleteDatalakeIndex(lake, index string) (err error) {
 
-	datalakeService := ingextAPI.NewDatalakeService(c.ingextClient)
+	datalakeService := fluencyAPI.NewDatalakeService(c.fluencyClient)
 
 	err = datalakeService.DeleteDatalakeIndex(lake, index)
 

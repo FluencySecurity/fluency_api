@@ -1,17 +1,17 @@
 package api
 
 import (
-	"github.com/SecurityDo/ingext_api/client"
-	"github.com/SecurityDo/ingext_api/model"
+	"github.com/SecurityDo/fluency_api/client"
+	"github.com/SecurityDo/fluency_api/model"
 )
 
 // PlatformService provides helpers for calling platform_* endpoints.
 type DatalakeService struct {
-	client *client.IngextClient
+	client *client.FluencyClient
 }
 
 // NewPlatformService constructs a PlatformService instance backed by the provided client.
-func NewDatalakeService(client *client.IngextClient) *DatalakeService {
+func NewDatalakeService(client *client.FluencyClient) *DatalakeService {
 	return &DatalakeService{client: client}
 }
 

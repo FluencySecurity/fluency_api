@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/SecurityDo/ingext_api/client"
-	"github.com/SecurityDo/ingext_api/model"
+	"github.com/SecurityDo/fluency_api/client"
+	"github.com/SecurityDo/fluency_api/model"
 )
 
 type AuthService struct {
-	client *client.IngextClient
+	client *client.FluencyClient
 }
 
-func NewAuthService(client *client.IngextClient) *AuthService {
+func NewAuthService(client *client.FluencyClient) *AuthService {
 	return &AuthService{
 		client: client,
 	}

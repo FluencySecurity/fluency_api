@@ -24,13 +24,14 @@ func InitConfig() {
 		os.Exit(1)
 	}
 
-	// Search config in ~/.ingext directory with name "config.yaml"
-	configPath := filepath.Join(home, ".ingext")
+	// Search config in ~/.fluency directory with name "config.yaml"
+	configPath := filepath.Join(home, ".fluency")
 	viper.AddConfigPath(configPath)
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")
 
-	viper.AutomaticEnv() // read in environment variables that match
+	viper.SetEnvPrefix("fluency")
+	viper.AutomaticEnv() // read in environment variables that match (e.g. FLUENCY_CLUSTER, FLUENCY_NAMESPACE)
 
 	// If a config file is found, read it in.
 	_ = viper.ReadInConfig()
@@ -66,7 +67,7 @@ func SaveConfig() error {
 		return err
 	}
 
-	configDir := filepath.Join(home, ".ingext")
+	configDir := filepath.Join(home, ".fluency")
 	if _, err := os.Stat(configDir); os.IsNotExist(err) {
 		_ = os.Mkdir(configDir, 0755)
 	}

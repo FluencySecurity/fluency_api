@@ -6,12 +6,12 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/SecurityDo/ingext_api/client"
+	"github.com/SecurityDo/fluency_api/client"
 )
 
-// IngextAppAPI defines the contract for interacting with the backend
+// FluencyAppAPI defines the contract for interacting with the backend
 /*
-type IngextAppAPI interface {
+type FluencyAppAPI interface {
 	Init(cluster, namespace, kubeCtx string) error
 	Call(functionName string, functionArgs json.RawMessage) error
 
@@ -21,7 +21,7 @@ type IngextAppAPI interface {
 	// ... add other methods here
 }*/
 
-// Client is the concrete implementation of IngextAppAPI
+// Client is the concrete implementation of FluencyAppAPI
 type Client struct {
 	Logger    *slog.Logger
 	Cluster   string
@@ -30,7 +30,7 @@ type Client struct {
 
 	// Embed the K8s helper
 	k8sClient    *K8sClusterClient
-	ingextClient *client.IngextClient // If you have a separate client for ingext
+	fluencyClient *client.FluencyClient
 }
 
 // Option 1: Constructor injection (Recommended)
@@ -48,9 +48,9 @@ func NewClient(logger *slog.Logger) *Client {
 }
 
 // Ensure Client implements the interface
-//var _ IngextAppAPI = (*Client)(nil)
+//var _ FluencyAppAPI = (*Client)(nil)
 
-var IngextAppAPI *Client
+var FluencyAppAPI *Client
 
 func (c *Client) Init(cluster, namespace string, kubeContext string) error {
 	c.Cluster = cluster
@@ -85,11 +85,11 @@ func (c *Client) Init(cluster, namespace string, kubeContext string) error {
 		return fmt.Errorf("failed to parse site config:  %s", err)
 	}
 
-	ingextClient := client.NewIngextClient(config.SiteURL, token, false, c.Logger)
+	fluencyClient := client.NewFluencyClient(config.SiteURL, token, false, c.Logger)
 
-	c.ingextClient = ingextClient
+	c.fluencyClient = fluencyClient
 
-	c.Logger.Info("initialized ingext client",
+	c.Logger.Info("initialized fluency client",
 		"siteURL", config.SiteURL,
 		//"token", token,
 	)

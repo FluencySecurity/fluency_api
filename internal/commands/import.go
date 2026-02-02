@@ -42,8 +42,8 @@ var importAppTemplateCmd = &cobra.Command{
 	},
 }
 
-// ingext processor add --name filter --content "@./scripts/filter.js"
-// echo "function process() { ... }" | ingext processor add --name filter --content -
+// fluency processor add --name filter --content "@./scripts/filter.js"
+// echo "function process() { ... }" | fluency processor add --name filter --content -
 func init() {
 	RootCmd.AddCommand(importCmd)
 	importCmd.AddCommand(importProcessorCmd, importAppTemplateCmd)

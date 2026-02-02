@@ -3,9 +3,9 @@ package api
 import (
 	"fmt"
 
-	ingextAPI "github.com/SecurityDo/ingext_api/api"
-	"github.com/SecurityDo/ingext_api/model"
-	ingextModel "github.com/SecurityDo/ingext_api/model"
+	fluencyAPI "github.com/SecurityDo/fluency_api/api"
+	"github.com/SecurityDo/fluency_api/model"
+	fluencyModel "github.com/SecurityDo/fluency_api/model"
 )
 
 func (c *Client) AddUser(name, displayName, role, org string) error {
@@ -16,10 +16,10 @@ func (c *Client) AddUser(name, displayName, role, org string) error {
 	//	"role", role,
 	//)
 
-	authService := ingextAPI.NewAuthService(c.ingextClient)
+	authService := fluencyAPI.NewAuthService(c.fluencyClient)
 
-	err := authService.AddUser(&ingextAPI.AddUserRequest{
-		User: &ingextModel.UserEntry{
+	err := authService.AddUser(&fluencyAPI.AddUserRequest{
+		User: &fluencyModel.UserEntry{
 			Username:     name,
 			Email:        name,
 			FirstName:    displayName,
@@ -38,7 +38,7 @@ func (c *Client) DeleteUser(username string) (err error) {
 
 	// Use structured logging
 
-	authService := ingextAPI.NewAuthService(c.ingextClient)
+	authService := fluencyAPI.NewAuthService(c.fluencyClient)
 
 	err = authService.DeleteUser(username)
 	if err != nil {
@@ -52,7 +52,7 @@ func (c *Client) ListUser() (users []*model.UserEntry, err error) {
 
 	// Use structured logging
 
-	authService := ingextAPI.NewAuthService(c.ingextClient)
+	authService := fluencyAPI.NewAuthService(c.fluencyClient)
 
 	users, err = authService.ListUser()
 	if err != nil {
@@ -70,7 +70,7 @@ func (c *Client) AddToken(name, displayName, role string) (token string, err err
 	//	"role", role,
 	//)
 
-	authService := ingextAPI.NewAuthService(c.ingextClient)
+	authService := fluencyAPI.NewAuthService(c.fluencyClient)
 
 	token, err = authService.AddToken(name, displayName, role)
 	if err != nil {
@@ -84,7 +84,7 @@ func (c *Client) DeleteToken(name string) (err error) {
 
 	// Use structured logging
 
-	authService := ingextAPI.NewAuthService(c.ingextClient)
+	authService := fluencyAPI.NewAuthService(c.fluencyClient)
 
 	err = authService.DeleteToken(name)
 	if err != nil {
@@ -98,7 +98,7 @@ func (c *Client) ListToken() (tokens []*model.ApiTokenEntry, err error) {
 
 	// Use structured logging
 
-	authService := ingextAPI.NewAuthService(c.ingextClient)
+	authService := fluencyAPI.NewAuthService(c.fluencyClient)
 
 	tokens, err = authService.ListToken()
 	if err != nil {

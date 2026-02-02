@@ -3,14 +3,14 @@ package api
 import (
 	"fmt"
 
-	"github.com/SecurityDo/ingext_api/api"
-	ingextAPI "github.com/SecurityDo/ingext_api/api"
-	"github.com/SecurityDo/ingext_api/model"
+	"github.com/SecurityDo/fluency_api/api"
+	fluencyAPI "github.com/SecurityDo/fluency_api/api"
+	"github.com/SecurityDo/fluency_api/model"
 )
 
 func (c *Client) ListAppTemplates() (templates []*model.ApplicationTemplateConfig, err error) {
 
-	applicationService := ingextAPI.NewApplicationService(c.ingextClient)
+	applicationService := fluencyAPI.NewApplicationService(c.fluencyClient)
 
 	resp, err := applicationService.ListAppTemplates()
 
@@ -23,7 +23,7 @@ func (c *Client) ListAppTemplates() (templates []*model.ApplicationTemplateConfi
 
 func (c *Client) InstallAppInstance(application, instance string, displayName string, parameters []*model.InputParameter) (err error) {
 
-	applicationService := ingextAPI.NewApplicationService(c.ingextClient)
+	applicationService := fluencyAPI.NewApplicationService(c.fluencyClient)
 
 	req := &api.InstallAppInstanceRequest{
 		Config: &model.InstanceConfig{
@@ -46,7 +46,7 @@ func (c *Client) InstallAppInstance(application, instance string, displayName st
 
 func (c *Client) GetAppInstance(application, instance string) (res *api.GetAppInstanceResponse, err error) {
 
-	applicationService := ingextAPI.NewApplicationService(c.ingextClient)
+	applicationService := fluencyAPI.NewApplicationService(c.fluencyClient)
 	res, err = applicationService.GetAppInstance(application, instance)
 
 	if err != nil {
@@ -59,7 +59,7 @@ func (c *Client) GetAppInstance(application, instance string) (res *api.GetAppIn
 
 func (c *Client) UnInstallAppInstance(application, instance string) (err error) {
 
-	applicationService := ingextAPI.NewApplicationService(c.ingextClient)
+	applicationService := fluencyAPI.NewApplicationService(c.fluencyClient)
 
 	req := &api.UnInstallAppInstanceRequest{
 		Application: application,
@@ -77,7 +77,7 @@ func (c *Client) UnInstallAppInstance(application, instance string) (err error) 
 
 func (c *Client) AddTemplate(content string) (id string, err error) {
 
-	applicationService := ingextAPI.NewApplicationService(c.ingextClient)
+	applicationService := fluencyAPI.NewApplicationService(c.fluencyClient)
 
 	id, err = applicationService.AddAppTemplate(content)
 
@@ -90,7 +90,7 @@ func (c *Client) AddTemplate(content string) (id string, err error) {
 
 func (c *Client) DeleteTemplate(name string) (err error) {
 
-	applicationService := ingextAPI.NewApplicationService(c.ingextClient)
+	applicationService := fluencyAPI.NewApplicationService(c.fluencyClient)
 
 	err = applicationService.DeleteAppTemplate(name)
 
@@ -103,7 +103,7 @@ func (c *Client) DeleteTemplate(name string) (err error) {
 
 func (c *Client) UpdateTemplate(name string, content string) (err error) {
 
-	applicationService := ingextAPI.NewApplicationService(c.ingextClient)
+	applicationService := fluencyAPI.NewApplicationService(c.fluencyClient)
 
 	err = applicationService.UpdateAppTemplate(name, content)
 

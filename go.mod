@@ -1,4 +1,4 @@
-module github.com/SecurityDo/ingext_api
+module github.com/SecurityDo/fluency_api
 
 go 1.25.0
 

@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/SecurityDo/ingext_api/client"
-	fsb "github.com/SecurityDo/ingext_api/fsb"
-	"github.com/SecurityDo/ingext_api/model"
+	"github.com/SecurityDo/fluency_api/client"
+	fsb "github.com/SecurityDo/fluency_api/fsb"
+	"github.com/SecurityDo/fluency_api/model"
 )
 
 func newAuthServiceForTest(t *testing.T, handler http.HandlerFunc) *AuthService {
@@ -16,7 +16,7 @@ func newAuthServiceForTest(t *testing.T, handler http.HandlerFunc) *AuthService 
 	ts := httptest.NewServer(handler)
 	t.Cleanup(ts.Close)
 
-	flClient := client.NewIngextClient(ts.URL, "", false, nil)
+	flClient := client.NewFluencyClient(ts.URL, "", false, nil)
 	return NewAuthService(flClient)
 }
 

@@ -3,7 +3,7 @@ package api
 import (
 	"fmt"
 
-	ingextAPI "github.com/SecurityDo/ingext_api/api"
+	fluencyAPI "github.com/SecurityDo/fluency_api/api"
 )
 
 func getParserType(processor_type string) (string, error) {
@@ -21,7 +21,7 @@ func getParserType(processor_type string) (string, error) {
 
 func (c *Client) ImportProcessor(processor_type string, repoName string) (err error) {
 
-	repoService := ingextAPI.NewRepoService(c.ingextClient)
+	repoService := fluencyAPI.NewRepoService(c.fluencyClient)
 
 	resp, err := repoService.ListRepos()
 
@@ -80,7 +80,7 @@ func (c *Client) ImportProcessor(processor_type string, repoName string) (err er
 
 func (c *Client) ImportAppTemplate(repoName string) (err error) {
 
-	repoService := ingextAPI.NewRepoService(c.ingextClient)
+	repoService := fluencyAPI.NewRepoService(c.fluencyClient)
 
 	resp, err := repoService.ListRepos()
 

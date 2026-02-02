@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/SecurityDo/ingext_api/model"
+	"github.com/SecurityDo/fluency_api/model"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +19,7 @@ var (
 
 var applicationCmd = &cobra.Command{
 	Use:   "application",
-	Short: "Manage Ingext Application",
+	Short: "Manage Fluency Application",
 }
 
 var appTemplateListCmd = &cobra.Command{
@@ -147,9 +147,9 @@ var appTemplateAddCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a template",
 	// Example usage:
-	// 1. ingext processor add --name my-proc --content "@./my-script.js"
-	// 2. ingext processor add --name my-proc --content "function process() { ... }"
-	// 3. cat my-script.js | ingext processor add --name my-proc --content -
+	// 1. fluency processor add --name my-proc --content "@./my-script.js"
+	// 2. fluency processor add --name my-proc --content "function process() { ... }"
+	// 3. cat my-script.js | fluency processor add --name my-proc --content -
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var content string
 		//var err error

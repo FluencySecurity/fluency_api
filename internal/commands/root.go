@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/SecurityDo/ingext_api/internal/api"
+	"github.com/SecurityDo/fluency_api/internal/api"
 
-	"github.com/SecurityDo/ingext_api/internal/config"
+	"github.com/SecurityDo/fluency_api/internal/config"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -35,11 +35,11 @@ Exception: Use cmd.Printf (or cmd.Println) only when you are printing the final 
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "ingext",
-	Short: "A CLI tool for managing ingext resources",
+	Use:   "fluency",
+	Short: "A CLI tool for managing fluency resources",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if showVersion {
-			cmd.Printf("ingext version %s\n", appVersion)
+			cmd.Printf("fluency version %s\n", appVersion)
 			return nil
 		}
 
@@ -48,7 +48,7 @@ var RootCmd = &cobra.Command{
 
 	SilenceUsage:  true, // Don't show help text on runtime errors
 	SilenceErrors: true, // Optional: if you want to print errors yourself in main.go
-	// PersistentPreRunE runs BEFORE the subcommand (e.g., 'ingext stream add')
+	// PersistentPreRunE runs BEFORE the subcommand (e.g., 'fluency stream add')
 	// but AFTER flags are parsed.
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// Skip initialization if we're only showing the version
@@ -80,7 +80,7 @@ var RootCmd = &cobra.Command{
 		kubeCtx := viper.GetString("context")
 		levelValue := viper.GetString("log-level")
 		if clusterName == "" {
-			return fmt.Errorf("cluster name is required. Run 'ingext config' or use --cluster")
+			return fmt.Errorf("cluster name is required. Run 'fluency config' or use --cluster")
 		}
 
 		// 1. Configure the Handler options
@@ -142,7 +142,7 @@ func init() {
 
 	// Define global flags
 	RootCmd.PersistentFlags().StringVar(&cluster, "cluster", "", "k8s cluster name")
-	RootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "ingext", "namespace of the ingext app")
+	RootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "fluency", "namespace of the fluency app")
 	RootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", defaultLogLevel, "log level: debug, info, warn, error")
 	RootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "show version")
 	RootCmd.Version = appVersion

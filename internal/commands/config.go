@@ -6,7 +6,7 @@ import (
 	"sort"
 	"text/tabwriter"
 
-	"github.com/SecurityDo/ingext_api/internal/config"
+	"github.com/SecurityDo/fluency_api/internal/config"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -19,8 +19,8 @@ var (
 
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Configure the ingext tool",
-	Long:  `Manage ingext configuration stored in ~/.ingext/config.yaml.`,
+	Short: "Configure the fluency tool",
+	Long:  `Manage fluency configuration stored in ~/.fluency/config.yaml.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return cmd.Help()
 	},
@@ -235,8 +235,8 @@ func pickFirstCluster(clusters map[string]interface{}) string {
 /*
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Configure the ingext tool",
-	Long:  `Sets configuration values in ~/.ingext/config.yaml`,
+	Short: "Configure the fluency tool",
+	Long:  `Sets configuration values in ~/.fluency/config.yaml`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Set values in Viper
 		// Note: cluster and namespace are already bound in root.go,
@@ -268,7 +268,7 @@ var configCmd = &cobra.Command{
 var configViewCmd = &cobra.Command{
 	Use:   "view",
 	Short: "View current configuration settings",
-	Long:  "Displays the current configuration loaded from ~/.ingext/config.yaml and environment variables.",
+	Long:  "Displays the current configuration loaded from ~/.fluency/config.yaml and environment variables.",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Use tabwriter to create a clean, aligned table
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)

@@ -4,7 +4,7 @@ import (
 	//"fmt"
 
 	"github.com/spf13/cobra"
-	//"github.com/SecurityDo/ingext_api/model"
+	//"github.com/SecurityDo/fluency_api/model"
 )
 
 var ()

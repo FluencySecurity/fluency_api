@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	//"github.com/SecurityDo/ingext_api/model"
+	//"github.com/SecurityDo/fluency_api/model"
 )
 
 var (
@@ -138,7 +138,7 @@ func init() {
 	userAddCmd.Flags().StringVar(&authName, "name", "", "Name of the user")
 	userAddCmd.Flags().StringVar(&authDisplayName, "displayName", "", "Display name")
 	userAddCmd.Flags().StringVar(&authRole, "role", "", "Role (admin|analyst)")
-	userAddCmd.Flags().StringVar(&authOrg, "org", "ingext", "Organization")
+	userAddCmd.Flags().StringVar(&authOrg, "org", "fluency", "Organization")
 
 	// Mark required
 	_ = userAddCmd.MarkFlagRequired("name")

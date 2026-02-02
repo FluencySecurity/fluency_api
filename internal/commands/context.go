@@ -1,6 +1,6 @@
 package commands
 
-import "github.com/SecurityDo/ingext_api/internal/api"
+import "github.com/SecurityDo/fluency_api/internal/api"
 
 // AppAPI is the global reference used by all subcommands.
 // We use the interface type so it can be mocked for testing.

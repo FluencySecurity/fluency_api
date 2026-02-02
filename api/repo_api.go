@@ -1,18 +1,18 @@
 package api
 
 import (
-	"github.com/SecurityDo/ingext_api/client"
-	"github.com/SecurityDo/ingext_api/model"
+	"github.com/SecurityDo/fluency_api/client"
+	"github.com/SecurityDo/fluency_api/model"
 	"github.com/google/go-github/v64/github"
 )
 
 // PlatformService provides helpers for calling platform_* endpoints.
 type RepoService struct {
-	client *client.IngextClient
+	client *client.FluencyClient
 }
 
 // NewPlatformService constructs a PlatformService instance backed by the provided client.
-func NewRepoService(client *client.IngextClient) *RepoService {
+func NewRepoService(client *client.FluencyClient) *RepoService {
 	return &RepoService{client: client}
 }
 

@@ -3,13 +3,13 @@ package api
 import (
 	"fmt"
 
-	ingextAPI "github.com/SecurityDo/ingext_api/api"
-	model "github.com/SecurityDo/ingext_api/model"
+	fluencyAPI "github.com/SecurityDo/fluency_api/api"
+	model "github.com/SecurityDo/fluency_api/model"
 )
 
 func (c *Client) AddProcessor(name, content, processorType, description string) (err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	if processorType == "" {
 		processorType = "fpl_processor" // Default to JavaScript if not specified
@@ -33,7 +33,7 @@ func (c *Client) AddProcessor(name, content, processorType, description string) 
 
 func (c *Client) DeleteProcessor(name string) (err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	err = platformService.DeleteProcessor(name)
 
@@ -46,7 +46,7 @@ func (c *Client) DeleteProcessor(name string) (err error) {
 
 func (c *Client) ListProcessor() (entries []*model.FPLScript, err error) {
 
-	platformService := ingextAPI.NewPlatformService(c.ingextClient)
+	platformService := fluencyAPI.NewPlatformService(c.fluencyClient)
 
 	entries, err = platformService.ListProcessors()
 
