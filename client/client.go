@@ -96,14 +96,19 @@ func (r *HTTPService) Call(prefix string, functionName string, input interface{}
 		return result, fmt.Errorf("failed to call local http service %s: %s", r.url, err.Error())
 	}
 	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		r.logger.Error("Failed to read response body", "Error", err.Error())
+		return result, fmt.Errorf("failed to read response body: %w", err)
+	}
 	if r.DebugFlag {
-		if dump, err := httputil.DumpResponse(resp, true); err == nil {
+		if dump, err := httputil.DumpResponse(resp, false); err == nil {
 			r.logger.Debug("Response:\n-----------------------------------------\n")
 			r.logger.Debug(string(dump))
 		}
+		r.logger.Debug("Response body:\n-----------------------------------------\n")
+		r.logger.Debug(string(body))
 	}
-	body, _ := io.ReadAll(resp.Body)
-	//fmt.Println("response Body:", string(body))
 	if resp.StatusCode != 200 {
 		r.logger.Error("HTTP ERROR from local http service %s: %s\n", r.url, resp.Status)
 		return result, fmt.Errorf("HTTP Error from Local HTTP service %s: %s", r.url, resp.Status)
@@ -155,6 +160,11 @@ func NewFluencyClient(siteURL string, token string, debugFlag bool, logger *slog
 
 	return s
 
+}
+
+// SetDebug enables or disables HTTP request/response dump logging.
+func (r *FluencyClient) SetDebug(debug bool) {
+	r.serviceClient.DebugFlag = debug
 }
 
 func (r *FluencyClient) GenericCall(prefix string, functionName string, x interface{}) (res *fsb.JNode, err error) {

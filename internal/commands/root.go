@@ -157,6 +157,11 @@ var RootCmd = &cobra.Command{
 			}
 		}
 
+		// 6. Enable HTTP request/response debug dumps when log level is debug
+		if strings.ToLower(levelValue) == "debug" {
+			AppAPI.SetDebug(true)
+		}
+
 		return nil
 	},
 }

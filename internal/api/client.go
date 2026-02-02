@@ -98,6 +98,13 @@ func (c *Client) Init(cluster, namespace string, kubeContext string) error {
 	return nil
 }
 
+// SetDebug enables or disables HTTP request/response dump logging (e.g. when --log-level debug).
+func (c *Client) SetDebug(debug bool) {
+	if c.fluencyClient != nil {
+		c.fluencyClient.SetDebug(debug)
+	}
+}
+
 // InitFromSiteConfig initializes the client from site_credentials.json (no Kubernetes).
 // siteConfigPath is the path to site_credentials.json; site is the hostname key (e.g. "demo.cloud.fluencysecurity.com").
 // If site is empty, the first site in tokenMap is used.

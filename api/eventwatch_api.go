@@ -1,0 +1,51 @@
+package api
+
+import (
+	"github.com/SecurityDo/fluency_api/client"
+	"github.com/SecurityDo/fluency_api/model"
+)
+
+// EventWatchService provides helpers for calling eventwatch/overview endpoints.
+type EventWatchService struct {
+	client *client.FluencyClient
+}
+
+// NewEventWatchService constructs an EventWatchService instance backed by the provided client.
+func NewEventWatchService(client *client.FluencyClient) *EventWatchService {
+	return &EventWatchService{client: client}
+}
+
+func (s *EventWatchService) call(function string, payload interface{}, out interface{}) error {
+	return ApiCall(s.client, function, payload, out)
+}
+
+// SummarySearch calls /api/ds/overview_summary_search with the given search string and time range.
+func (s *EventWatchService) SummarySearch(searchString string, rangeFrom, rangeTo int64) (*model.ElasticSearchResult, error) {
+	req := &ElasticSearchRequest{
+		Options: &SimpleSearchOption{
+			SearchStr: searchString,
+			RangeFrom: rangeFrom,
+			RangeTo:   rangeTo,
+			RangeField: "from",
+			FetchLimit: 100,
+			FetchOffset: 0,
+			SortField: "to",
+			SortOrder: "desc",
+			Facets: &FacetsOption{
+				Facets: []*FacetEntry{},
+				MustFilters: []*FilterEntry{},
+				MustNotFilters: []*FilterEntry{},
+			},
+		},
+	}
+	var resp model.ElasticSearchResult
+	if err := s.call("behavior_summary_search", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+type ElasticSearchRequest struct {
+	Options *SimpleSearchOption `json:"options,omitempty"`
+}
+
