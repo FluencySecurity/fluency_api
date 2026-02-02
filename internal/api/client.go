@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/SecurityDo/fluency_api/client"
+	"github.com/SecurityDo/fluency_api/internal/config"
 )
 
 // FluencyAppAPI defines the contract for interacting with the backend
@@ -94,6 +95,23 @@ func (c *Client) Init(cluster, namespace string, kubeContext string) error {
 		//"token", token,
 	)
 
+	return nil
+}
+
+// InitFromSiteConfig initializes the client from site_credentials.json (no Kubernetes).
+// siteConfigPath is the path to site_credentials.json; site is the hostname key (e.g. "demo.cloud.fluencysecurity.com").
+// If site is empty, the first site in tokenMap is used.
+func (c *Client) InitFromSiteConfig(siteConfigPath, site string) error {
+	creds, err := config.LoadSiteCredentials(siteConfigPath)
+	if err != nil {
+		return err
+	}
+	baseURL, token, err := config.ResolveSite(creds, site)
+	if err != nil {
+		return err
+	}
+	c.fluencyClient = client.NewFluencyClient(baseURL, token, false, c.Logger)
+	c.Logger.Info("initialized fluency client from site config", "siteURL", baseURL)
 	return nil
 }
 

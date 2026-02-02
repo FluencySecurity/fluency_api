@@ -93,6 +93,11 @@ func (k *K8sClusterClient) Connect(kubeContext string) error {
 	return nil
 }
 
+// IsConnected returns true if the client has been connected to a cluster.
+func (k *K8sClusterClient) IsConnected() bool {
+	return k != nil && k.clientset != nil
+}
+
 // GetAppSecretToken fetches a secret from k8s and returns the "token" field
 func (k *K8sClusterClient) GetAppSecret(namespace, secretName string, key string) (string, error) {
 	if k.clientset == nil {

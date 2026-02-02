@@ -1,11 +1,12 @@
 # fluency CLI
 
-`fluency` is a command-line interface tool for managing Fluency resources on Kubernetes. It allows users to manage streams, processors, integrations, and authentication through a structured, AWS-CLI-style interface.
+`fluency` is a command-line interface tool for managing Fluency resources. It allows users to manage streams, processors, integrations, and authentication through a structured, AWS-CLI-style interface.
 
 ## Features
 
 * **Standardized CLI:** Follows the intuitive `noun verb [flags]` pattern (e.g., `fluency stream add source`).
-* **Kubernetes Native:** Connects directly to your clusters using your local `kubeconfig` context.
+* **Site config:** Run commands using a `site_credentials.json` file (site hostname → API token); no Kubernetes required.
+* **Kubernetes optional:** Can also connect via your local `kubeconfig` context when cluster/namespace are configured.
 * **Pipe Friendly:** Designed for automation—strictly separates data output (STDOUT) from logs (STDERR) and supports reading files from STDIN.
 * **Smart Config:** Hierarchical configuration (Flags > Env Vars > Config File).
 
@@ -30,37 +31,59 @@ install -m 755 fluency /usr/local/bin/.
 
 ## Configuration
 
-Before running commands, configure the target Kubernetes cluster and namespace. This saves settings to `~/.fluency/config.yaml`.
+### Option 1: Site config (recommended, no Kubernetes)
 
-```bash
-# Set your default target
-fluency config set --cluster <k8s-cluster> --namespace <app-namespace> --context <kubectlContext>  --provider <eks|aks|gke>
+Place a `site_credentials.json` file in your current directory (or pass `--site-config <path>`). The file maps site hostnames to API tokens:
 
-# Example
-fluency config set --cluster datalake  --namespace fluency --provider eks --context arn:aws:eks:$Region:$AWSAccount:cluster/datalake 
-
+```json
+{
+  "tokenMap": {
+    "demo.cloud.fluencysecurity.com": "api-token",
+    "expo.app.fluencyplatform.com": "api-token"
+  }
+}
 ```
 
-You can view your current configuration at any time:
+Then run any command; the first site in `tokenMap` is used by default. To target a specific site, use `--site` or set a **default site** so you don't need `--site` every time:
+
+**Default site (when `--site` is not set):**
+
+- **Command:** `fluency config set-default-site demo.cloud.fluencysecurity.com` (saves to `~/.fluency/config.yaml`)
+- **Config file:** or add to `~/.fluency/config.yaml`:
+  ```yaml
+  default-site: demo.cloud.fluencysecurity.com
+  ```
+- **Environment:** `export FLUENCY_DEFAULT_SITE=demo.cloud.fluencysecurity.com`
 
 ```bash
-fluency config view
+fluency --site demo.cloud.fluencysecurity.com stream list source
+fluency --site-config /path/to/site_credentials.json auth list-user
 ```
 
-List all configured clusters or delete a cluster profile:
+### Option 2: Kubernetes cluster and namespace
+
+Configure the target cluster and namespace (saved to `~/.fluency/config.yaml`):
 
 ```bash
-fluency config list
+fluency config set --cluster <k8s-cluster> --namespace <app-namespace> --context <kubectlContext> --provider <eks|aks|gke>
+fluency config view              # show cluster + site settings (default site, site config path, available sites)
+fluency config list              # list configured clusters
+fluency config list-sites        # list sites from site_credentials.json (marks default with *)
+fluency config set-default-site <hostname>   # set default site (e.g. demo.cloud.fluencysecurity.com)
 fluency config delete --cluster <cluster-name>
 ```
 
-**Environment Variables**
-You can override defaults using `FLUENCY_` prefixed variables:
+**Environment variables**
+
+Override with `FLUENCY_` prefixed variables:
 
 ```bash
+export FLUENCY_SITE_CONFIG=/path/to/site_credentials.json
+export FLUENCY_SITE=demo.cloud.fluencysecurity.com
+export FLUENCY_DEFAULT_SITE=demo.cloud.fluencysecurity.com   # default when --site is not set
+# Or for Kubernetes mode:
 export FLUENCY_CLUSTER=prod-cluster
 export FLUENCY_NAMESPACE=fluency
-
 ```
 
 ## Usage
@@ -69,14 +92,16 @@ export FLUENCY_NAMESPACE=fluency
 
 | Flag | Shorthand | Default | Description |
 | --- | --- | --- | --- |
-| `--cluster` |  | _none_ | Target Kubernetes cluster (required unless set via config). |
-| `--namespace` | `-n` | `fluency` | Namespace of the fluency app. |
+| `--site-config` |  | `./site_credentials.json` | Path to site_credentials.json (site hostname → token). |
+| `--site` |  | _first in tokenMap_ | Site hostname to use (e.g. `demo.cloud.fluencysecurity.com`). |
+| `--cluster` |  | _none_ | Kubernetes cluster (required only when not using site config). |
+| `--namespace` | `-n` | `fluency` | Namespace of the fluency app (Kubernetes mode). |
 | `--log-level` | `-l` | `warn` | Log level: `debug`, `info`, `warn`, or `error`. |
 | `--version` | `-v` | `false` | Print CLI version (`1.1.0`) and exit. |
 
 ### Status (`status`)
 
-Check the current namespace for running services and health checks for core fluency endpoints. Prints a table plus a summary of healthy/degraded/down services.
+When connected via Kubernetes, check the current namespace for running services and health checks. When using site config, this command reports that status is only available in cluster mode.
 
 ```bash
 fluency status

@@ -5,6 +5,9 @@ import (
 )
 
 func (c *Client) CheckStatus() error {
+	if c.k8sClient == nil || !c.k8sClient.IsConnected() {
+		return fmt.Errorf("status is only available when connected via Kubernetes (--cluster and --namespace); when using site config (site_credentials.json), cluster health is not checked")
+	}
 
 	serviceStatuses, err := c.k8sClient.CheckNamespaceServices(c.Namespace)
 	if err != nil {

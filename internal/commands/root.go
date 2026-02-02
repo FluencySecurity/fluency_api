@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/SecurityDo/fluency_api/internal/api"
@@ -16,11 +17,13 @@ import (
 
 var (
 	// Global flags
-	cfgFile     string
-	cluster     string
-	namespace   string
-	logLevel    string
-	showVersion bool
+	cfgFile      string
+	cluster      string
+	namespace    string
+	siteConfig   string
+	site         string
+	logLevel     string
+	showVersion  bool
 )
 
 const (
@@ -77,10 +80,38 @@ var RootCmd = &cobra.Command{
 		// 2. Load values from Viper (which now holds flags + config file values)
 		clusterName := viper.GetString("cluster")
 		namespace := viper.GetString("namespace")
+		siteConfigPath := viper.GetString("site-config")
+		siteName := viper.GetString("site")
+		if siteName == "" {
+			siteName = viper.GetString("default-site")
+		}
 		kubeCtx := viper.GetString("context")
 		levelValue := viper.GetString("log-level")
-		if clusterName == "" {
-			return fmt.Errorf("cluster name is required. Run 'fluency config' or use --cluster")
+
+		// Resolve site-config path: if not set, default to site_credentials.json in cwd
+		if siteConfigPath == "" {
+			if cwd, err := os.Getwd(); err == nil {
+				siteConfigPath = filepath.Join(cwd, "site_credentials.json")
+			}
+		}
+
+		useSiteConfig := false
+		if siteConfigPath != "" {
+			if _, err := os.Stat(siteConfigPath); err == nil {
+				useSiteConfig = true
+			}
+		}
+
+		if useSiteConfig {
+			// Initialize from site_credentials.json (no Kubernetes)
+			if clusterName != "" || namespace != "" {
+				// User passed cluster/namespace but we have site config; prefer site config
+			}
+		} else {
+			// Require cluster/namespace when not using site config
+			if clusterName == "" {
+				return fmt.Errorf("cluster name is required when not using site config. Run 'fluency config' or use --cluster, or place site_credentials.json in the current directory")
+			}
 		}
 
 		// 1. Configure the Handler options
@@ -106,22 +137,24 @@ var RootCmd = &cobra.Command{
 		// 3. Create the Logger
 		logger := slog.New(handler)
 
-		// If context is empty in config, we can default to empty string
-		// (which means client-go uses the "current-context" from ~/.kube/config)
-		if kubeCtx == "" {
-
-			// Optional: log a warning
+		// If using Kubernetes and context is empty, client-go uses current-context from ~/.kube/config
+		if !useSiteConfig && kubeCtx == "" {
 			logger.Warn("no kube-context specified in config, using current system default")
-
 		}
 
 		// 4. Inject into your Client
 		// Now your client logs will go to Stderr, respecting the --log-level flag
 		AppAPI = api.NewClient(logger)
 
-		// 3. Initialize the Global API
-		if err := AppAPI.Init(clusterName, namespace, kubeCtx); err != nil {
-			return fmt.Errorf("failed to initialize app API: %w", err)
+		// 5. Initialize the Global API: site config (preferred) or Kubernetes
+		if useSiteConfig {
+			if err := AppAPI.InitFromSiteConfig(siteConfigPath, siteName); err != nil {
+				return fmt.Errorf("failed to initialize from site config: %w", err)
+			}
+		} else {
+			if err := AppAPI.Init(clusterName, namespace, kubeCtx); err != nil {
+				return fmt.Errorf("failed to initialize app API: %w", err)
+			}
 		}
 
 		return nil
@@ -141,12 +174,16 @@ func init() {
 	cobra.OnInitialize(config.InitConfig)
 
 	// Define global flags
-	RootCmd.PersistentFlags().StringVar(&cluster, "cluster", "", "k8s cluster name")
-	RootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "fluency", "namespace of the fluency app")
+	RootCmd.PersistentFlags().StringVar(&siteConfig, "site-config", "", "path to site_credentials.json (default: ./site_credentials.json)")
+	RootCmd.PersistentFlags().StringVar(&site, "site", "", "site hostname from tokenMap (e.g. demo.cloud.fluencysecurity.com); if empty and using site config, first site is used")
+	RootCmd.PersistentFlags().StringVar(&cluster, "cluster", "", "k8s cluster name (used when not using site config)")
+	RootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "fluency", "namespace of the fluency app (used when not using site config)")
 	RootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", defaultLogLevel, "log level: debug, info, warn, error")
 	RootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "show version")
 	RootCmd.Version = appVersion
 	// Bind global flags to viper so they can be accessed anywhere
+	viper.BindPFlag("site-config", RootCmd.PersistentFlags().Lookup("site-config"))
+	viper.BindPFlag("site", RootCmd.PersistentFlags().Lookup("site"))
 	viper.BindPFlag("cluster", RootCmd.PersistentFlags().Lookup("cluster"))
 	viper.BindPFlag("namespace", RootCmd.PersistentFlags().Lookup("namespace"))
 	viper.BindPFlag("log-level", RootCmd.PersistentFlags().Lookup("log-level"))

@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"text/tabwriter"
 
@@ -173,30 +174,118 @@ var configDeleteCmd = &cobra.Command{
 	},
 }
 
-// Subcommand: VIEW (Updated to show current-cluster logic)
+// Subcommand: VIEW (Updated to show current-cluster logic and site config)
 var configViewCmd = &cobra.Command{
 	Use:   "view",
 	Short: "View current configuration settings",
 	Run: func(cmd *cobra.Command, args []string) {
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
-		// Identify current context
-		current := viper.GetString("current-cluster")
-		prefix := fmt.Sprintf("clusters.%s.", current)
-
 		fmt.Fprintln(w, "SETTING\tVALUE")
 		fmt.Fprintln(w, "-------\t-----")
 
+		// Kubernetes / cluster section
+		current := viper.GetString("current-cluster")
+		prefix := fmt.Sprintf("clusters.%s.", current)
 		fmt.Fprintf(w, "Current Cluster\t%s\n", current)
-		// Note: We access config via full path or fallback to defaults
 		fmt.Fprintf(w, "Provider\t%s\n", viper.GetString(prefix+"provider"))
 		fmt.Fprintf(w, "Namespace\t%s\n", viper.GetString(prefix+"namespace"))
 		fmt.Fprintf(w, "Context\t%s\n", viper.GetString(prefix+"context"))
+
+		// Site config section (default site, site-config path, available sites)
+		defaultSite := viper.GetString("default-site")
+		siteConfigPath := viper.GetString("site-config")
+		if siteConfigPath == "" {
+			if cwd, err := os.Getwd(); err == nil {
+				siteConfigPath = filepath.Join(cwd, "site_credentials.json")
+			}
+		}
+		fmt.Fprintln(w, "-------\t-----")
+		fmt.Fprintf(w, "Default Site\t%s\n", defaultSite)
+		fmt.Fprintf(w, "Site Config File\t%s\n", siteConfigPath)
+		if siteConfigPath != "" {
+			if creds, err := config.LoadSiteCredentials(siteConfigPath); err == nil {
+				keys := make([]string, 0, len(creds.TokenMap))
+				for k := range creds.TokenMap {
+					keys = append(keys, k)
+				}
+				sort.Strings(keys)
+				for i, k := range keys {
+					mark := ""
+					if k == defaultSite {
+						mark = " (default)"
+					}
+					if i == 0 {
+						fmt.Fprintf(w, "Available Sites\t%s%s\n", k, mark)
+					} else {
+						fmt.Fprintf(w, "\t%s%s\n", k, mark)
+					}
+				}
+			}
+		}
 
 		fmt.Fprintln(w, "-------\t-----")
 		fmt.Fprintf(w, "Config File\t%s\n", viper.ConfigFileUsed())
 
 		w.Flush()
+	},
+}
+
+// Subcommand: LIST-SITES (list sites from site_credentials.json)
+var configListSitesCmd = &cobra.Command{
+	Use:   "list-sites",
+	Short: "List available sites from site_credentials.json",
+	Long:  `Lists site hostnames (keys) from the site config file. Use --site-config to specify the file; otherwise ./site_credentials.json is used. Marks the default site with * if default-site is set.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		siteConfigPath := viper.GetString("site-config")
+		if siteConfigPath == "" {
+			if cwd, err := os.Getwd(); err == nil {
+				siteConfigPath = filepath.Join(cwd, "site_credentials.json")
+			}
+		}
+		if siteConfigPath == "" {
+			cmd.PrintErrln("Error: No site config path. Use --site-config <path> or run from a directory containing site_credentials.json.")
+			return
+		}
+		creds, err := config.LoadSiteCredentials(siteConfigPath)
+		if err != nil {
+			cmd.PrintErrln("Error:", err)
+			return
+		}
+		defaultSite := viper.GetString("default-site")
+		keys := make([]string, 0, len(creds.TokenMap))
+		for k := range creds.TokenMap {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+		fmt.Fprintln(w, "SITE\tDEFAULT")
+		fmt.Fprintln(w, "----\t-------")
+		for _, k := range keys {
+			mark := ""
+			if k == defaultSite {
+				mark = "*"
+			}
+			fmt.Fprintf(w, "%s\t%s\n", k, mark)
+		}
+		w.Flush()
+	},
+}
+
+// Subcommand: SET-DEFAULT-SITE (persist default site to ~/.fluency/config.yaml)
+var configSetDefaultSiteCmd = &cobra.Command{
+	Use:   "set-default-site [site]",
+	Short: "Set the default site for site config",
+	Long:  `Saves the default site hostname to ~/.fluency/config.yaml. When --site is not set, this site is used. Example: fluency config set-default-site demo.cloud.fluencysecurity.com`,
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		hostname := args[0]
+		viper.Set("default-site", hostname)
+		if err := config.SaveConfig(); err != nil {
+			cmd.PrintErrln("Error saving config:", err)
+			return
+		}
+		fmt.Printf("Default site set to %q.\n", hostname)
 	},
 }
 
@@ -207,6 +296,8 @@ func init() {
 
 	// Add new subcommands
 	configCmd.AddCommand(configListCmd)
+	configCmd.AddCommand(configListSitesCmd)
+	configCmd.AddCommand(configSetDefaultSiteCmd)
 	configCmd.AddCommand(configDeleteCmd)
 
 	// Configuration for 'config' command
