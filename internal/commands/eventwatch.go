@@ -55,6 +55,18 @@ var eventwatchTimelineSearchCmd = &cobra.Command{
 	},
 }
 
+var eventwatchRuleSearchCmd = &cobra.Command{
+	Use:   "rule_search",
+	Short: "Run rule search (eventwatch_bucket_search)",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		resp, err := AppAPI.RuleSearch(eventwatchQuery)
+		if err != nil {
+			return err
+		}
+		return printEventwatchHits(cmd, resp, "BehaviorRule")
+	},
+}
+
 func printEventwatchHits(cmd *cobra.Command, resp *model.ElasticSearchResult, sourceType string) error {
 	if resp.Hits == nil || len(resp.Hits.Hits) == 0 {
 		cmd.PrintErrln("No hits found.")
@@ -76,6 +88,13 @@ func printEventwatchHits(cmd *cobra.Command, resp *model.ElasticSearchResult, so
 				continue
 			}
 			cmd.Printf("Key: %s, RiskScore: %d\n", src.Key, src.RiskScore)
+		case "BehaviorRule":
+			var src model.EventWatchBucket
+			if err := json.Unmarshal(hit.Source, &src); err != nil {
+				cmd.PrintErrf("skip hit %s: invalid _source: %v\n", hit.Id, err)
+				continue
+			}
+			cmd.Printf("Name: %s, Group: %s, Repository: %s\n", src.Name, src.Group, src.Repository)
 		default:
 			cmd.PrintErrf("skip hit %s: unknown source type %q\n", hit.Id, sourceType)
 		}
@@ -85,7 +104,7 @@ func printEventwatchHits(cmd *cobra.Command, resp *model.ElasticSearchResult, so
 
 func init() {
 	RootCmd.AddCommand(eventwatchCmd)
-	eventwatchCmd.AddCommand(eventwatchSummarySearchCmd, eventwatchTimelineSearchCmd)
+	eventwatchCmd.AddCommand(eventwatchSummarySearchCmd, eventwatchTimelineSearchCmd, eventwatchRuleSearchCmd)
 
 	eventwatchSummarySearchCmd.Flags().StringVar(&eventwatchQuery, "query", "", "Search query")
 	eventwatchSummarySearchCmd.Flags().Int64Var(&eventwatchFrom, "from", 0, "Range start (Unix ms); default: 1 hour ago")
@@ -94,4 +113,6 @@ func init() {
 	eventwatchTimelineSearchCmd.Flags().StringVar(&eventwatchQuery, "query", "", "Search query")
 	eventwatchTimelineSearchCmd.Flags().Int64Var(&eventwatchFrom, "from", 0, "Range start (Unix ms); default: 1 hour ago")
 	eventwatchTimelineSearchCmd.Flags().Int64Var(&eventwatchTo, "to", 0, "Range end (Unix ms); default: now")
+
+	eventwatchRuleSearchCmd.Flags().StringVar(&eventwatchQuery, "query", "", "Search query")
 }

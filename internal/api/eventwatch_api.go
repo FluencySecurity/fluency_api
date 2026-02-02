@@ -28,3 +28,14 @@ func (c *Client) TimelineSearch(searchString string, rangeFrom, rangeTo int64) (
 	}
 	return resp, nil
 }
+
+// RuleSearch calls the eventwatch_bucket_search API with the given search string (no time range).
+func (c *Client) RuleSearch(searchString string) (*model.ElasticSearchResult, error) {
+	svc := fluencyAPI.NewEventWatchService(c.fluencyClient)
+	resp, err := svc.RuleSearch(searchString)
+	if err != nil {
+		c.Logger.Error("failed to run rule search", "error", err)
+		return nil, fmt.Errorf("failed to run rule search: %w", err)
+	}
+	return resp, nil
+}

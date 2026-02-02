@@ -71,6 +71,29 @@ func (s *EventWatchService) TimelineSearch(searchString string, rangeFrom, range
 	return &resp, nil
 }
 
+// RuleSearch calls /api/ds/eventwatch_bucket_search with the given search string (no time range).
+func (s *EventWatchService) RuleSearch(searchString string) (*model.ElasticSearchResult, error) {
+	req := &ElasticSearchRequest{
+		Options: &SimpleSearchOption{
+			SearchStr:  searchString,
+			FetchLimit: 100,
+			FetchOffset: 0,
+			SortField:  "name",
+			SortOrder:  "asc",
+			Facets: &FacetsOption{
+				Facets:         []*FacetEntry{},
+				MustFilters:    []*FilterEntry{},
+				MustNotFilters: []*FilterEntry{},
+			},
+		},
+	}
+	var resp model.ElasticSearchResult
+	if err := s.call("eventwatch_bucket_search", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
 type ElasticSearchRequest struct {
 	Options *SimpleSearchOption `json:"options,omitempty"`
 }
