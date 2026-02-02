@@ -20,7 +20,7 @@ var eventwatchCmd = &cobra.Command{
 }
 
 var eventwatchSummarySearchCmd = &cobra.Command{
-	Use:   "summary_search",
+	Use:   "search_summary",
 	Short: "Run summary search",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		from, to := eventwatchFrom, eventwatchTo
@@ -38,7 +38,7 @@ var eventwatchSummarySearchCmd = &cobra.Command{
 }
 
 var eventwatchTimelineSearchCmd = &cobra.Command{
-	Use:   "timeline_search",
+	Use:   "search_timeline",
 	Short: "Run timeline search (fsm_behavior_search)",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		from, to := eventwatchFrom, eventwatchTo
@@ -56,7 +56,7 @@ var eventwatchTimelineSearchCmd = &cobra.Command{
 }
 
 var eventwatchRuleSearchCmd = &cobra.Command{
-	Use:   "rule_search",
+	Use:   "search_rule",
 	Short: "Run rule search (eventwatch_bucket_search)",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		resp, err := AppAPI.RuleSearch(eventwatchQuery)
