@@ -14,9 +14,71 @@ import (
 
 // Server runs the HTTP API backed by the Fluency API client.
 type Server struct {
-	API  *api.Client
-	Addr string
-	Log  *slog.Logger
+	API          *api.Client
+	Addr         string
+	Log          *slog.Logger
+	endpointList []EndpointEntry // set in Routes() for GET /api/endpoints
+}
+
+// routeDef defines one route: method, path, description, and handler.
+type routeDef struct {
+	Method      string
+	Path        string
+	Description string
+	Handler     func(http.ResponseWriter, *http.Request)
+}
+
+// routeDefinitions returns all API routes with handlers bound to this server.
+func (s *Server) routeDefinitions() []routeDef {
+	return []routeDef{
+		{"GET", "/health", "Health check", s.healthHandler},
+		{"GET", "/api/endpoints", "List all API endpoints", s.endpointsHandler},
+		{"POST", "/api/eventwatch/summary-search", "EventWatch summary search", s.eventwatchSummarySearch},
+		{"POST", "/api/eventwatch/timeline-search", "EventWatch timeline search", s.eventwatchTimelineSearch},
+		{"POST", "/api/eventwatch/rule-search", "EventWatch rule search", s.eventwatchRuleSearch},
+		{"POST", "/api/audit/search", "Audit search", s.auditSearch},
+		{"GET", "/api/datalake", "List datalakes", s.datalakeList},
+		{"POST", "/api/datalake", "Add datalake", s.datalakeAdd},
+		{"GET", "/api/datalake/index", "List datalake indexes (query: lake)", s.datalakeListIndex},
+		{"POST", "/api/datalake/index", "Add datalake index", s.datalakeAddIndex},
+		{"DELETE", "/api/datalake/index", "Delete datalake index (query: lake, index)", s.datalakeDeleteIndex},
+		{"POST", "/api/auth/users", "Add user", s.authAddUser},
+		{"DELETE", "/api/auth/users", "Delete user (query: name)", s.authDeleteUser},
+		{"GET", "/api/auth/users", "List users", s.authListUsers},
+		{"POST", "/api/auth/tokens", "Add token", s.authAddToken},
+		{"DELETE", "/api/auth/tokens", "Delete token (query: name)", s.authDeleteToken},
+		{"GET", "/api/auth/tokens", "List tokens", s.authListTokens},
+		{"GET", "/api/application/templates", "List application templates", s.applicationListTemplates},
+		{"POST", "/api/application/install", "Install application instance", s.applicationInstall},
+		{"GET", "/api/application/instance", "Get application instance (query: app, instance)", s.applicationGetInstance},
+		{"DELETE", "/api/application/instance", "Uninstall instance (query: app, instance)", s.applicationUninstall},
+		{"POST", "/api/application/templates", "Add template", s.applicationAddTemplate},
+		{"DELETE", "/api/application/templates", "Delete template (query: app)", s.applicationDeleteTemplate},
+		{"PUT", "/api/application/templates", "Update template (query: app)", s.applicationUpdateTemplate},
+		{"GET", "/api/processor", "List processors", s.processorList},
+		{"POST", "/api/processor", "Add processor", s.processorAdd},
+		{"DELETE", "/api/processor", "Delete processor (query: name)", s.processorDelete},
+		{"GET", "/api/integration", "List integrations", s.integrationList},
+		{"POST", "/api/integration", "Add integration", s.integrationAdd},
+		{"DELETE", "/api/integration", "Delete integration (query: id)", s.integrationDelete},
+		{"POST", "/api/stream/connect-sink", "Connect router to sink", s.streamConnectSink},
+		{"POST", "/api/stream/connect-router", "Connect source to router", s.streamConnectRouter},
+		{"POST", "/api/stream/router", "Add stream router", s.streamAddRouter},
+		{"POST", "/api/stream/source", "Add stream source", s.streamAddSource},
+		{"DELETE", "/api/stream/source", "Delete stream source (query: id)", s.streamDeleteSource},
+		{"GET", "/api/stream/source", "List stream sources", s.streamListSources},
+		{"POST", "/api/stream/sink", "Add stream sink", s.streamAddSink},
+		{"DELETE", "/api/stream/sink", "Delete stream sink (query: id)", s.streamDeleteSink},
+		{"GET", "/api/stream/sink", "List stream sinks", s.streamListSinks},
+		{"GET", "/api/eks/pod-role", "Get EKS pod role", s.eksGetPodRole},
+		{"POST", "/api/eks/test-assumed-role", "Test assumed role", s.eksTestAssumedRole},
+		{"POST", "/api/eks/assumed-role", "Add assumed role", s.eksAddAssumedRole},
+		{"DELETE", "/api/eks/assumed-role", "Delete assumed role (query: id)", s.eksDeleteAssumedRole},
+		{"GET", "/api/eks/assumed-role", "List assumed roles", s.eksListAssumedRoles},
+		{"GET", "/api/status", "System status (Kubernetes only)", s.statusCheck},
+		{"POST", "/api/import/processor", "Import processors from repo", s.importProcessor},
+		{"POST", "/api/import/application", "Import application templates from repo", s.importApplication},
+	}
 }
 
 // New builds a server that uses the given API client.
@@ -30,77 +92,12 @@ func New(apiClient *api.Client, addr string, log *slog.Logger) *Server {
 // Routes returns the HTTP handler for all API and health routes.
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
-
-	// Health
-	mux.HandleFunc("GET /health", s.healthHandler)
-
-	// EventWatch
-	mux.HandleFunc("POST /api/eventwatch/summary-search", s.eventwatchSummarySearch)
-	mux.HandleFunc("POST /api/eventwatch/timeline-search", s.eventwatchTimelineSearch)
-	mux.HandleFunc("POST /api/eventwatch/rule-search", s.eventwatchRuleSearch)
-
-	// Audit
-	mux.HandleFunc("POST /api/audit/search", s.auditSearch)
-
-	// Datalake
-	mux.HandleFunc("GET /api/datalake", s.datalakeList)
-	mux.HandleFunc("POST /api/datalake", s.datalakeAdd)
-	mux.HandleFunc("GET /api/datalake/index", s.datalakeListIndex)
-	mux.HandleFunc("POST /api/datalake/index", s.datalakeAddIndex)
-	mux.HandleFunc("DELETE /api/datalake/index", s.datalakeDeleteIndex)
-
-	// Auth (users and tokens)
-	mux.HandleFunc("POST /api/auth/users", s.authAddUser)
-	mux.HandleFunc("DELETE /api/auth/users", s.authDeleteUser)
-	mux.HandleFunc("GET /api/auth/users", s.authListUsers)
-	mux.HandleFunc("POST /api/auth/tokens", s.authAddToken)
-	mux.HandleFunc("DELETE /api/auth/tokens", s.authDeleteToken)
-	mux.HandleFunc("GET /api/auth/tokens", s.authListTokens)
-
-	// Application
-	mux.HandleFunc("GET /api/application/templates", s.applicationListTemplates)
-	mux.HandleFunc("POST /api/application/install", s.applicationInstall)
-	mux.HandleFunc("GET /api/application/instance", s.applicationGetInstance)
-	mux.HandleFunc("DELETE /api/application/instance", s.applicationUninstall)
-	mux.HandleFunc("POST /api/application/templates", s.applicationAddTemplate)
-	mux.HandleFunc("DELETE /api/application/templates", s.applicationDeleteTemplate)
-	mux.HandleFunc("PUT /api/application/templates", s.applicationUpdateTemplate)
-
-	// Processor
-	mux.HandleFunc("GET /api/processor", s.processorList)
-	mux.HandleFunc("POST /api/processor", s.processorAdd)
-	mux.HandleFunc("DELETE /api/processor", s.processorDelete)
-
-	// Integration
-	mux.HandleFunc("GET /api/integration", s.integrationList)
-	mux.HandleFunc("POST /api/integration", s.integrationAdd)
-	mux.HandleFunc("DELETE /api/integration", s.integrationDelete)
-
-	// Stream (sources, sinks, routers)
-	mux.HandleFunc("POST /api/stream/connect-sink", s.streamConnectSink)
-	mux.HandleFunc("POST /api/stream/connect-router", s.streamConnectRouter)
-	mux.HandleFunc("POST /api/stream/router", s.streamAddRouter)
-	mux.HandleFunc("POST /api/stream/source", s.streamAddSource)
-	mux.HandleFunc("DELETE /api/stream/source", s.streamDeleteSource)
-	mux.HandleFunc("GET /api/stream/source", s.streamListSources)
-	mux.HandleFunc("POST /api/stream/sink", s.streamAddSink)
-	mux.HandleFunc("DELETE /api/stream/sink", s.streamDeleteSink)
-	mux.HandleFunc("GET /api/stream/sink", s.streamListSinks)
-
-	// EKS / AWS assumed roles
-	mux.HandleFunc("GET /api/eks/pod-role", s.eksGetPodRole)
-	mux.HandleFunc("POST /api/eks/test-assumed-role", s.eksTestAssumedRole)
-	mux.HandleFunc("POST /api/eks/assumed-role", s.eksAddAssumedRole)
-	mux.HandleFunc("DELETE /api/eks/assumed-role", s.eksDeleteAssumedRole)
-	mux.HandleFunc("GET /api/eks/assumed-role", s.eksListAssumedRoles)
-
-	// Status
-	mux.HandleFunc("GET /api/status", s.statusCheck)
-
-	// Import
-	mux.HandleFunc("POST /api/import/processor", s.importProcessor)
-	mux.HandleFunc("POST /api/import/application", s.importApplication)
-
+	routes := s.routeDefinitions()
+	s.endpointList = make([]EndpointEntry, 0, len(routes))
+	for _, r := range routes {
+		mux.HandleFunc(r.Method+" "+r.Path, r.Handler)
+		s.endpointList = append(s.endpointList, EndpointEntry{Method: r.Method, Path: r.Path, Description: r.Description})
+	}
 	return mux
 }
 
