@@ -19,6 +19,47 @@ var auditCmd = &cobra.Command{
 	Short: "Audit service",
 }
 
+var auditDbStatusCmd = &cobra.Command{
+	Use:   "db_status",
+	Short: "Get DB status",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		resp, err := AppAPI.DbStatus()
+		if err != nil {
+			return err
+		}
+		// etcd overall status and nodes (name: active)
+		if resp.EtcdStatus != nil {
+			cmd.Printf("etcd status: %s\n", resp.EtcdStatus.Status)
+			for _, n := range resp.EtcdStatus.Nodes {
+				if n != nil {
+					active := "inactive"
+					if n.Active {
+						active = "active"
+					}
+					cmd.Printf("  %s: %s\n", n.Name, active)
+				}
+			}
+		}
+		// master status with leader
+		if resp.Master != nil {
+			cmd.Printf("master status: %s, leader: %s\n", resp.Master.Status, resp.Master.Leader)
+		}
+		// indexes: indexname: queue.length
+		if len(resp.Indexes) > 0 {
+			for _, idx := range resp.Indexes {
+				if idx != nil {
+					length := uint(0)
+					if idx.Queue != nil {
+						length = idx.Queue.Length
+					}
+					cmd.Printf("index: %s, length: %d\n", idx.IndexName, length)
+				}
+			}
+		}
+		return nil
+	},
+}
+
 var auditListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List audit events",
@@ -52,7 +93,7 @@ var auditListCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(auditCmd)
-	auditCmd.AddCommand(auditListCmd)
+	auditCmd.AddCommand(auditListCmd, auditDbStatusCmd)
 
 	auditListCmd.Flags().StringVar(&auditQuery, "query", "", "Search query")
 	auditListCmd.Flags().Int64Var(&auditFrom, "from", 0, "Range start (Unix ms); default: 1 hour ago")

@@ -33,3 +33,14 @@ func (s *Server) auditSearch(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusOK, resp)
 }
+
+// auditDbStatus handles POST /api/ds/db_status with body {}.
+func (s *Server) auditDbStatus(w http.ResponseWriter, r *http.Request) {
+	resp, err := s.API.DbStatus()
+	if err != nil {
+		s.Log.Error("db_status failed", "error", err)
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, resp)
+}

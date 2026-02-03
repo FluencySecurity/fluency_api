@@ -17,3 +17,14 @@ func (c *Client) AuditSearch(searchString string, rangeFrom, rangeTo int64) (*mo
 	}
 	return resp, nil
 }
+
+// DbStatus calls the db_status API and returns the DB status response.
+func (c *Client) DbStatus() (*model.DbStatusResponse, error) {
+	svc := fluencyAPI.NewAuditService(c.fluencyClient)
+	resp, err := svc.DbStatus()
+	if err != nil {
+		c.Logger.Error("failed to get db status", "error", err)
+		return nil, fmt.Errorf("failed to get db status: %w", err)
+	}
+	return resp, nil
+}

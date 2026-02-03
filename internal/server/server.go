@@ -37,6 +37,7 @@ func (s *Server) routeDefinitions() []routeDef {
 		{"POST", "/api/eventwatch/timeline-search", "EventWatch timeline search", s.eventwatchTimelineSearch},
 		{"POST", "/api/eventwatch/rule-search", "EventWatch rule search", s.eventwatchRuleSearch},
 		{"POST", "/api/audit/search", "Audit search", s.auditSearch},
+		{"POST", "/api/ds/db_status", "DB status (audit)", s.auditDbStatus},
 		{"GET", "/api/datalake", "List datalakes", s.datalakeList},
 		{"POST", "/api/datalake", "Add datalake", s.datalakeAdd},
 		{"GET", "/api/datalake/index", "List datalake indexes (query: lake)", s.datalakeListIndex},

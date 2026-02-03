@@ -44,3 +44,12 @@ func (s *AuditService) AuditSearch(searchString string, rangeFrom, rangeTo int64
 	}
 	return &resp, nil
 }
+
+// DbStatus calls /api/ds/db_status with an empty request and returns the DB status.
+func (s *AuditService) DbStatus() (*model.DbStatusResponse, error) {
+	var resp model.DbStatusResponse
+	if err := s.call("db_status", map[string]interface{}{}, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
