@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/SecurityDo/fluency_api/model"
 )
 
 // LoadSiteCredentials reads site_credentials.json from path and returns the struct.
+// TokenMap entries whose key starts with "_" are discarded.
 func LoadSiteCredentials(path string) (*model.SiteCredentials, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -19,8 +21,19 @@ func LoadSiteCredentials(path string) (*model.SiteCredentials, error) {
 	if err := json.Unmarshal(data, &creds); err != nil {
 		return nil, fmt.Errorf("failed to parse site credentials: %w", err)
 	}
-	if creds.TokenMap == nil || len(creds.TokenMap) == 0 {
+	if creds.TokenMap == nil {
 		return nil, fmt.Errorf("site credentials file has no tokenMap or tokenMap is empty")
+	}
+	// Discard any tokenMap keys that start with "_"
+	filtered := make(map[string]string, len(creds.TokenMap))
+	for k, v := range creds.TokenMap {
+		if !strings.HasPrefix(k, "_") {
+			filtered[k] = v
+		}
+	}
+	creds.TokenMap = filtered
+	if len(creds.TokenMap) == 0 {
+		return nil, fmt.Errorf("site credentials file has no tokenMap or tokenMap is empty (after discarding keys starting with _)")
 	}
 	return &creds, nil
 }
