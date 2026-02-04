@@ -216,6 +216,12 @@ fluency import processor --type fpl_processor
 fluency import application
 ```
 
+### Scripts
+
+The `scripts/` directory contains automation that calls the CLI for all sites in `site_credentials.json`:
+
+- **`audit_db_status_all_sites.sh`** – Runs `fluency audit db_status` for every site and reports which are up or down. Custom “down” criteria can be added in the script. Requires **jq**. See `scripts/README.md` for usage.
+
 ## Development
 
 ### Project Structure

@@ -11,8 +11,8 @@ const getBase = () => {
   return ''
 }
 
-export async function getHealth(): Promise<{ status: string }> {
-  const res = await fetch(`${getBase()}/health`)
+export async function getHealth(signal?: AbortSignal): Promise<{ status: string }> {
+  const res = await fetch(`${getBase()}/health`, { signal })
   if (!res.ok) throw new Error(`Health check failed: ${res.status}`)
   return res.json()
 }
@@ -27,8 +27,8 @@ export interface EndpointsResponse {
   endpoints: EndpointEntry[]
 }
 
-export async function getEndpoints(): Promise<EndpointsResponse> {
-  const res = await fetch(`${getBase()}/api/endpoints`)
+export async function getEndpoints(signal?: AbortSignal): Promise<EndpointsResponse> {
+  const res = await fetch(`${getBase()}/api/endpoints`, { signal })
   if (!res.ok) throw new Error(`Failed to fetch endpoints: ${res.status}`)
   return res.json()
 }

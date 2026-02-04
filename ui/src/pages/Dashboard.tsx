@@ -10,11 +10,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const controller = new AbortController()
+    const signal = controller.signal
     let cancelled = false
     setLoading(true)
     setError(null)
 
-    Promise.all([getHealth(), getEndpoints()])
+    Promise.all([getHealth(signal), getEndpoints(signal)])
       .then(([h, { endpoints: list }]) => {
         if (!cancelled) {
           setHealth(h)
@@ -22,7 +24,7 @@ export default function Dashboard() {
         }
       })
       .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : String(e))
+        if (!cancelled && e?.name !== 'AbortError') setError(e instanceof Error ? e.message : String(e))
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -30,6 +32,7 @@ export default function Dashboard() {
 
     return () => {
       cancelled = true
+      controller.abort()
     }
   }, [])
 
