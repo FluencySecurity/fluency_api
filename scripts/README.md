@@ -46,3 +46,40 @@ By default, a site is **down** if `fluency audit db_status` exits non-zero (e.g.
 - Treat **index queue length** above a threshold as down.
 
 Edit the section marked “Add your custom criteria below” in `audit_db_status_all_sites.sh`.
+
+---
+
+## audit_db_status_slack_alert.sh
+
+Runs `audit_db_status_all_sites.sh`; if any site is down (exit code non-zero), sends an alert to a **Slack Incoming Webhook** with the check output.
+
+### Prerequisites
+
+- Everything required for `audit_db_status_all_sites.sh` (fluency, jq, site_credentials.json).
+- A Slack Incoming Webhook URL (create one in Slack: App → Incoming Webhooks → Add to Slack).
+
+### Configuring the webhook
+
+Use either:
+
+- **Environment variable:** `export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/..."`
+- **CLI flag:** `--slack-webhook-url "https://hooks.slack.com/services/..."`
+
+### Usage
+
+```bash
+# Webhook from environment
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+./scripts/audit_db_status_slack_alert.sh
+
+# Webhook from command line
+./scripts/audit_db_status_slack_alert.sh --slack-webhook-url "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+
+# With audit script options (passed through)
+./scripts/audit_db_status_slack_alert.sh --slack-webhook-url "https://..." --site-config /path/to/site_credentials.json -v
+```
+
+### Exit codes
+
+- Same as `audit_db_status_all_sites.sh`: `0` = all OK, `1` = one or more sites down, `2` = script/config error (including missing webhook URL).
+- When exit is `1`, the script posts to Slack and then exits 1.

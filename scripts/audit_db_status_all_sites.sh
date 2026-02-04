@@ -108,7 +108,8 @@ done
 
 if [[ ${#down_sites[@]} -gt 0 ]]; then
   echo "" >&2
-  echo "Down sites: ${down_sites[*]}" >&2
+  echo "Down sites:" >&2
+  for s in "${down_sites[@]}"; do echo "$s" >&2; done
   exit 1
 fi
 exit 0

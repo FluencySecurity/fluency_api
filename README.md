@@ -221,6 +221,7 @@ fluency import application
 The `scripts/` directory contains automation that calls the CLI for all sites in `site_credentials.json`:
 
 - **`audit_db_status_all_sites.sh`** – Runs `fluency audit db_status` for every site and reports which are up or down. Custom “down” criteria can be added in the script. Requires **jq**. See `scripts/README.md` for usage.
+- **`audit_db_status_slack_alert.sh`** – Runs the db_status check and, if any site is down, sends an alert to a Slack webhook (configure via `SLACK_WEBHOOK_URL` or `--slack-webhook-url`).
 
 ## Development
 
