@@ -83,3 +83,39 @@ export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
 
 - Same as `audit_db_status_all_sites.sh`: `0` = all OK, `1` = one or more sites down, `2` = script/config error (including missing webhook URL).
 - When exit is `1`, the script posts to Slack and then exits 1.
+
+---
+
+## billing_run_all_sites.sh
+
+Runs the billing FPL report for every site in `site_credentials.json`, polls until completed (or aborted), then writes results to a CSV. See script header for details.
+
+---
+
+## billing_slack_alert.sh
+
+Runs `billing_run_all_sites.sh` and sends the generated **CSV as a Slack attachment** (plus a short header). Console output is still printed locally.
+
+### Prerequisites
+
+- Everything required for `billing_run_all_sites.sh` (fluency, jq, site_credentials.json, reports/billing.json).
+- A Slack Incoming Webhook URL.
+
+### Configuring the webhook
+
+- **Environment variable:** `export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/..."`
+- **CLI flag:** `--slack-webhook-url "https://hooks.slack.com/services/..."`
+
+### Usage
+
+```bash
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+./scripts/billing_slack_alert.sh
+
+./scripts/billing_slack_alert.sh --slack-webhook-url "https://..." --site-config /path/to/site_credentials.json
+
+# Attach a different CSV (e.g. if you passed --output to the billing script)
+./scripts/billing_slack_alert.sh --slack-webhook-url "https://..." --csv /path/to/billing_results.csv
+```
+
+By default the script attaches the CSV at `./billing_results.csv` (repo root). Use `--csv PATH` if the billing script wrote to a different path (e.g. via `--output`). Exits with the same exit code as the billing script.
