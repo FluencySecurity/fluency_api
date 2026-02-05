@@ -57,44 +57,56 @@ if [[ ${#sites[@]} -eq 0 ]]; then
 fi
 
 # Optional: add custom criteria by parsing output. Return 0 = down, 1 = up.
+# When down, sets global REASON_DOWN (newline-separated reasons) for the caller.
 # Default: site is down if fluency command failed (exit code != 0).
 is_site_down() {
   local site="$1"
   local exit_code="$2"
   local output="$3"
 
+  REASON_DOWN=""
+
   # Default: command failure means down
   if [[ "$exit_code" -ne 0 ]]; then
+    REASON_DOWN="command failed (exit code $exit_code)"
     return 0
   fi
 
   # etcd status not green => down
   if ! echo "$output" | grep -q "etcd status: green"; then
+    REASON_DOWN="etcd status not green"
     return 0
   fi
 
   # master status not green => down
   if ! echo "$output" | grep -q "master status: green"; then
+    REASON_DOWN="master status not green"
     return 0
   fi
 
   # any index length > 1000 => down
   while IFS= read -r len; do
-    [[ -n "$len" && "$len" -gt 1000 ]] && return 0
+    if [[ -n "$len" && "$len" -gt 1000 ]]; then
+      REASON_DOWN="at least one index queue length > 1000 (e.g. length: $len)"
+      return 0
+    fi
   done < <(echo "$output" | grep -oE "length: [0-9]+" | sed 's/length: //')
 
   return 1
 }
 
 down_sites=()
+down_reasons=()
 for site in "${sites[@]}"; do
   set +e
   output=$( "$FLUENCY" --site-config "$SITE_CONFIG" --site "$site" audit db_status 2>&1 )
   exit_code=$?
   set -e
 
+  REASON_DOWN=""
   if is_site_down "$site" "$exit_code" "$output"; then
     down_sites+=("$site")
+    down_reasons+=("${REASON_DOWN:-unknown}")
     status="DOWN"
   else
     status="OK"
@@ -108,8 +120,10 @@ done
 
 if [[ ${#down_sites[@]} -gt 0 ]]; then
   echo "" >&2
-  echo "Down sites:" >&2
-  for s in "${down_sites[@]}"; do echo "$s" >&2; done
+  echo "Down sites (with reason):" >&2
+  for i in "${!down_sites[@]}"; do
+    echo "  ${down_sites[i]}: ${down_reasons[i]}" >&2
+  done
   exit 1
 fi
 exit 0

@@ -55,13 +55,12 @@ fi
 # Something is down: send Slack alert
 echo "$output"
 
-# Build Slack message with only down sites (one per line)
-down_only=$(echo "$output" | grep -E ': DOWN$' | sed 's/: DOWN$//')
+# Build Slack message with down sites and reasons (from "Down sites (with reason):" block)
+down_section=$(echo "$output" | sed -n '/^Down sites (with reason):/,$p')
 message="*Fluency DB status check: one or more sites down*
 
 \`\`\`
-Down sites:
-${down_only}
+${down_section}
 \`\`\`
 Run from: $(hostname) at $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
 
