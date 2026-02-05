@@ -79,6 +79,9 @@ func (s *Server) routeDefinitions() []routeDef {
 		{"GET", "/api/status", "System status (Kubernetes only)", s.statusCheck},
 		{"POST", "/api/import/processor", "Import processors from repo", s.importProcessor},
 		{"POST", "/api/import/application", "Import application templates from repo", s.importApplication},
+		{"POST", "/api/fpl/run", "Run FPL v2 report (run_report)", s.fplRunReport},
+		{"GET", "/api/fpl/task", "Get FPL task by ID (query: id)", s.fplGetTask},
+		{"GET", "/api/fpl/results", "Get FPL results by task ID (query: id)", s.fplGetResults},
 	}
 }
 

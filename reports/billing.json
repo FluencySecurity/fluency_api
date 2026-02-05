@@ -1,0 +1,10 @@
+{
+  "entry": {
+    "name": "Billing Report",
+    "reportConfig": {
+      "panels": [],
+      "layout": []
+    },
+    "fpl": "\nfunction main({from=\"-1mon@mon\", to=\"@mon\"}) {\n    //     \n    let rangeFrom = new Time(from)\n    let rangeTo = new Time(to)\n    let duration = (rangeTo.Unix() - rangeFrom.Unix()) / 86400\n    let query = Platform_Metric_QueryBuild(queryOptions(\"platform_egress_bytes\", duration))\n    let sinkTableData = Platform_Metric_Query(query, to)\n    \n    query = Platform_Metric_QueryBuild(queryOptions(\"platform_egress_count\", duration))\n    let sinkTableCount = Platform_Metric_Query(query, to)\n    \n    let overallTable = sinkTableData.Clone(\"_timestamp\", \"_value\")\n    overallTable.RenameColumn(\"_value\", \"total\")\n    overallTable.Join(sinkTableCount, ({_timestamp}, {_value: count}) =\u003e \"inner\")\n    overallTable.NewColumnLambda(\"daily\", \"\", (row) =\u003e row.total / duration)\n    \n    // get summary tickets\n    let tickets = getSummaryTickets(rangeFrom, rangeTo)\n    overallTable.NewColumnLambda(\"tickets\", \"\", (row) =\u003e tickets)\n    \n    return {overallTable}\n}\n\nfunction queryOptions(metric, duration) {\n    return {\n        metric: metric,\n        select: \"\",\n        duration: sprintf(\"%vd\", duration),\n        stat: \"increase\",\n        aggregate:\"sum\",\n        groupBy: []\n    }\n}\n\nfunction getSummaryTickets(from, to) {\n    let hits = 0\n    let res = Platform_REST_Call(\"FluencyAPI\", {\n        path: \"/api/ds/behavior_summary_search\",\n        debug: false,\n        body: {\n          kargs: {\n            \"options\": {\n        \t\t\t\"facets\": {},\n        \t\t\t\"fetchLimit\": 1,\n        \t\t\t\"fetchOffset\": 0,\n        \t\t\t\"range_field\": \"from\",\n        \t\t\t\"range_from\": from.UnixMilli(),\n        \t\t\t\"range_to\": to.UnixMilli(),\n        \t\t\t\"searchStr\": \"riskScore:[3000 TO *]\"\n        \t\t}\n          }\n        }\n  })\n  \n  if (res.data?.verdict == \"OK\") {\n      if (res.data.response?.hits?.total) {\n          hits = res.data.response?.hits?.total\n      }\n  }\n  \n  return hits\n}\n\n"
+  }
+}
