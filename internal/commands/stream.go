@@ -3,6 +3,9 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
 
 	model "github.com/SecurityDo/fluency_api/model"
 	"github.com/spf13/cobra"
@@ -27,6 +30,61 @@ var (
 	sinkID   string // For connecting source to router
 
 )
+
+// formatSlotTime formats a slot (Unix milliseconds) as a readable time string.
+func formatSlotTime(slotMs int64) string {
+	return time.UnixMilli(slotMs).Format("2006-01-02 15:04:05")
+}
+
+// formatIntWithCommas formats n with thousand separators (e.g. 20785008 -> "20,785,008").
+func formatIntWithCommas(n int64) string {
+	s := strconv.FormatInt(n, 10)
+	if n < 0 {
+		s = s[1:]
+	}
+	digits := len(s)
+	if digits <= 3 {
+		if n < 0 {
+			return "-" + s
+		}
+		return s
+	}
+	var b strings.Builder
+	first := digits % 3
+	if first == 0 {
+		first = 3
+	}
+	if n < 0 {
+		b.WriteByte('-')
+	}
+	b.WriteString(s[:first])
+	for i := first; i < digits; i += 3 {
+		b.WriteByte(',')
+		b.WriteString(s[i : i+3])
+	}
+	return b.String()
+}
+
+// formatFloatWithCommas formats f with thousand separators; whole numbers like 20,785,008, decimals like 0.063.
+func formatFloatWithCommas(f float64) string {
+	intPart := int64(f)
+	if f == float64(intPart) {
+		return formatIntWithCommas(intPart)
+	}
+	frac := f - float64(intPart)
+	if frac < 0 {
+		frac = -frac
+	}
+	fracStr := strings.TrimRight(strings.TrimRight(strconv.FormatFloat(frac, 'f', 6, 64), "0"), ".")
+	if strings.HasPrefix(fracStr, "0.") {
+		fracStr = "." + fracStr[2:]
+	}
+	out := formatIntWithCommas(intPart) + fracStr
+	if f < 0 && intPart == 0 {
+		out = "-" + out
+	}
+	return out
+}
 
 var streamCmd = &cobra.Command{
 	Use:   "stream",
@@ -252,11 +310,56 @@ var addSinkCmd = &cobra.Command{
 	},
 }
 
-// ... Repeat for sink, router, connection ...
+var streamStatusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "Get platform status",
+	Long:  "Calls the platform ListConfigs API and prints metrics (id, action; slots: values).",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		metrics, err := AppAPI.PlatformStatus()
+		if err != nil {
+			return err
+		}
+		printed := 0
+		for _, m := range metrics {
+			if m == nil {
+				continue
+			}
+			comp := strings.ToLower(strings.TrimSpace(m.Component))
+			action := strings.ToLower(strings.TrimSpace(m.Action))
+			switch comp {
+			case "datasource", "source":
+				if action != "input" {
+					continue
+				}
+			case "datasink", "sink":
+				if action != "output" {
+					continue
+				}
+			default:
+				continue
+			}
+			if printed > 0 {
+				cmd.Println()
+			}
+			printed++
+			cmd.Printf("%s, %s\n", m.ID, m.Action)
+			slots := m.Slots
+			values := m.Values
+			n := len(slots)
+			if len(values) < n {
+				n = len(values)
+			}
+			for j := 0; j < n; j++ {
+				cmd.Printf("%s - %s B\n", formatSlotTime(slots[j]), formatFloatWithCommas(values[j]))
+			}
+		}
+		return nil
+	},
+}
 
 func init() {
 	RootCmd.AddCommand(streamCmd)
-	streamCmd.AddCommand(addSourceCmd, delSourceCmd, listSourceCmd, addSinkCmd, delSinkCmd, listSinkCmd, addRouterCmd, connectRouterCmd, connectSinkCmd) // Add del/update similarly
+	streamCmd.AddCommand(addSourceCmd, delSourceCmd, listSourceCmd, addSinkCmd, delSinkCmd, listSinkCmd, addRouterCmd, connectRouterCmd, connectSinkCmd, streamStatusCmd)
 
 	addSourceCmd.Flags().StringVar(&sourceType, "source-type", "", "data source type: plugin, s3, hec, webhook ")
 	addSourceCmd.Flags().StringVar(&resourceName, "name", "", "Name")
@@ -303,5 +406,4 @@ func init() {
 
 	_ = connectSinkCmd.MarkFlagRequired("sink-id")
 	_ = connectSinkCmd.MarkFlagRequired("router-id")
-
 }

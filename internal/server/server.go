@@ -71,6 +71,7 @@ func (s *Server) routeDefinitions() []routeDef {
 		{"POST", "/api/stream/sink", "Add stream sink", s.streamAddSink},
 		{"DELETE", "/api/stream/sink", "Delete stream sink (query: id)", s.streamDeleteSink},
 		{"GET", "/api/stream/sink", "List stream sinks", s.streamListSinks},
+		{"GET", "/api/stream/status", "Platform status", s.platformStatus},
 		{"GET", "/api/eks/pod-role", "Get EKS pod role", s.eksGetPodRole},
 		{"POST", "/api/eks/test-assumed-role", "Test assumed role", s.eksTestAssumedRole},
 		{"POST", "/api/eks/assumed-role", "Add assumed role", s.eksAddAssumedRole},

@@ -421,11 +421,28 @@ type ListConfigsResponse struct {
 	Sinks        []*model.DataSinkConfig      `json:"sinks"`
 	Routers      []*model.RouterConfig        `json:"routers"`
 	Pipes        []*model.StreamPipeConfig    `json:"pipes"`
+	Metrics      []*ComponentStat                       `json:"metrics"`
 	Channels     []*model.ChannelConfig       `json:"channels"`
 	Connections  []*model.RouterInput         `json:"connections"`
 	Integrations []*model.Integration         `json:"integrations"`
 	Errors       []*model.PluginNotification  `json:"errors"`
 	ErrorStates  []*model.ComponentErrorState `json:"errorStates"`
+}
+
+type ComponentStat struct {
+	Tenant    string `json:"tenant,omitempty"`
+	Action    string `json:"action"`
+	Namespace string `json:"namespace"`
+	Component string `json:"component"`
+	ID        string `json:"id"`
+	Unit      string `json:"unit"`
+
+	Application string `json:"application,omitempty"`
+	AppInstance string `json:"appInstance,omitempty"`
+
+	Slots  []int64   `json:"slots"`
+	Values []float64 `json:"values"`
+	// Values    []model.SamplePair `json:"values"`
 }
 
 type DataSourceEntryResponse struct {

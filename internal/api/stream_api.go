@@ -166,6 +166,17 @@ func (c *Client) SetSourceRouter(sourceID, routerID string) (err error) {
 	return nil
 }
 
+// PlatformStatus calls the platform ListConfigs API and returns the metrics from the configuration snapshot.
+func (c *Client) PlatformStatus() ([]*fluencyAPI.ComponentStat, error) {
+	svc := fluencyAPI.NewPlatformService(c.fluencyClient)
+	resp, err := svc.ListConfigs()
+	if err != nil {
+		c.Logger.Error("failed to get platform status", "error", err)
+		return nil, fmt.Errorf("platform status: %w", err)
+	}
+	return resp.Metrics, nil
+}
+
 /*
 func (c *Client) AddPipe(routerConfig *model.StreamPipeConfig) (id string, err error) {
 
