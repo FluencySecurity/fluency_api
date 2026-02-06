@@ -29,6 +29,7 @@ var (
 	routerID string // For connecting source to router
 	sinkID   string // For connecting source to router
 
+	timeslots int // number of slot/value lines to show for stream status (1-24)
 )
 
 // formatSlotTime formats a slot (Unix milliseconds) as a readable time string.
@@ -315,6 +316,9 @@ var streamStatusCmd = &cobra.Command{
 	Short: "Get platform status",
 	Long:  "Calls the platform ListConfigs API and prints metrics (id, action; slots: values).",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if timeslots < 1 || timeslots > 24 {
+			return fmt.Errorf("timeslots must be between 1 and 24, got %d", timeslots)
+		}
 		metrics, err := AppAPI.PlatformStatus()
 		if err != nil {
 			return err
@@ -349,7 +353,12 @@ var streamStatusCmd = &cobra.Command{
 			if len(values) < n {
 				n = len(values)
 			}
-			for j := 0; j < n; j++ {
+			// Print only the last timeslots slot/value pairs (most recent)
+			start := 0
+			if n > timeslots {
+				start = n - timeslots
+			}
+			for j := start; j < n; j++ {
 				cmd.Printf("%s - %s B\n", formatSlotTime(slots[j]), formatFloatWithCommas(values[j]))
 			}
 		}
@@ -406,4 +415,6 @@ func init() {
 
 	_ = connectSinkCmd.MarkFlagRequired("sink-id")
 	_ = connectSinkCmd.MarkFlagRequired("router-id")
+
+	streamStatusCmd.Flags().IntVar(&timeslots, "timeslots", 24, "number of time slots to show (1-24, most recent)")
 }
