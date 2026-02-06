@@ -6,7 +6,7 @@ Scripts that interact with the `fluency` CLI for monitoring and automation.
 
 - `fluency` binary on your PATH (or use `--fluency /path/to/fluency`).
 - A `site_credentials.json` file with a `tokenMap` of site hostnames to API tokens.
-- For `audit_db_status_all_sites.sh`: **jq** (used to parse the JSON config).
+- **jq** (used to parse the JSON config and for Slack payloads).
 
 ## audit_db_status_all_sites.sh
 
@@ -82,6 +82,68 @@ export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
 ### Exit codes
 
 - Same as `audit_db_status_all_sites.sh`: `0` = all OK, `1` = one or more sites down, `2` = script/config error (including missing webhook URL).
+- When exit is `1`, the script posts to Slack and then exits 1.
+
+---
+
+## platform_status_all_sites.sh
+
+Runs `fluency stream status` (platform status) for **every site** in `site_credentials.json` and reports which sites succeed or fail. A site is considered **OK** if it has input data (total input > 0), otherwise it's marked as **DOWN**.
+
+### Usage
+
+```bash
+# From repo root (uses ./site_credentials.json)
+./scripts/platform_status_all_sites.sh
+
+# Custom site config or fluency binary
+./scripts/platform_status_all_sites.sh --site-config /path/to/site_credentials.json --fluency ./fluency
+
+# Verbose: print full error output for failed sites
+./scripts/platform_status_all_sites.sh -v
+```
+
+### Exit codes
+
+- `0` – All sites OK (have input data).
+- `1` – One or more sites down or failed (see stderr for list).
+- `2` – Script error (missing config, jq missing, etc.).
+
+---
+
+## platform_status_slack_alert.sh
+
+Runs `platform_status_all_sites.sh`; if any site is down (exit code non-zero), sends an alert to a **Slack Incoming Webhook** with the failed sites and their error messages.
+
+### Prerequisites
+
+- Everything required for `platform_status_all_sites.sh` (fluency, jq, site_credentials.json).
+- A Slack Incoming Webhook URL (create one in Slack: App → Incoming Webhooks → Add to Slack).
+
+### Configuring the webhook
+
+Use either:
+
+- **Environment variable:** `export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/..."`
+- **CLI flag:** `--slack-webhook-url "https://hooks.slack.com/services/..."`
+
+### Usage
+
+```bash
+# Webhook from environment
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+./scripts/platform_status_slack_alert.sh
+
+# Webhook from command line
+./scripts/platform_status_slack_alert.sh --slack-webhook-url "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+
+# With platform status script options (passed through)
+./scripts/platform_status_slack_alert.sh --slack-webhook-url "https://..." --site-config /path/to/site_credentials.json -v
+```
+
+### Exit codes
+
+- Same as `platform_status_all_sites.sh`: `0` = all OK, `1` = one or more sites down, `2` = script/config error (including missing webhook URL).
 - When exit is `1`, the script posts to Slack and then exits 1.
 
 ---
