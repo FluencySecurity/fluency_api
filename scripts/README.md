@@ -148,6 +148,68 @@ export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
 
 ---
 
+## eventwatch_status_all_sites.sh
+
+Runs `fluency eventwatch search_timeline` for the **last 2 hours** for every site in `site_credentials.json`. A site is **OK** if there is at least one timeline event in that window; otherwise it is reported with error **no timeline events**. API/connection failures are reported with a summarized error. Lists all sites that have errors.
+
+### Usage
+
+```bash
+# From repo root (uses ./site_credentials.json)
+./scripts/eventwatch_status_all_sites.sh
+
+# Custom site config or fluency binary
+./scripts/eventwatch_status_all_sites.sh --site-config /path/to/site_credentials.json --fluency ./fluency
+
+# Verbose: print full error output for failed sites
+./scripts/eventwatch_status_all_sites.sh -v
+```
+
+### Exit codes
+
+- `0` – All sites OK (at least one timeline event in last 2 hours).
+- `1` – One or more sites have errors (no timeline events or API failure); see stderr for list.
+- `2` – Script error (missing config, jq missing, etc.).
+
+---
+
+## eventwatch_status_slack_alert.sh
+
+Runs `eventwatch_status_all_sites.sh`; if any site has errors (exit code non-zero), sends an alert to a **Slack Incoming Webhook** with the list of failed sites and their errors.
+
+### Prerequisites
+
+- Everything required for `eventwatch_status_all_sites.sh` (fluency, jq, site_credentials.json).
+- A Slack Incoming Webhook URL.
+
+### Configuring the webhook
+
+Use either:
+
+- **Environment variable:** `export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/..."`
+- **CLI flag:** `--slack-webhook-url "https://hooks.slack.com/services/..."`
+
+### Usage
+
+```bash
+# Webhook from environment
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+./scripts/eventwatch_status_slack_alert.sh
+
+# Webhook from command line
+./scripts/eventwatch_status_slack_alert.sh --slack-webhook-url "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+
+# With eventwatch status script options (passed through)
+./scripts/eventwatch_status_slack_alert.sh --slack-webhook-url "https://..." --site-config /path/to/site_credentials.json -v
+```
+
+### Exit codes
+
+- Same as `eventwatch_status_all_sites.sh`: `0` = all OK, `1` = one or more sites have errors, `2` = script/config error (including missing webhook URL).
+- When exit is `1`, the script posts to Slack and then exits 1.
+
+---
+
 ## billing_run_all_sites.sh
 
 Runs the billing FPL report for every site in `site_credentials.json`, polls until completed (or aborted), then writes results to a CSV. See script header for details.
