@@ -8,6 +8,8 @@ Scripts that interact with the `fluency` CLI for monitoring and automation.
 - A `site_credentials.json` file with a `tokenMap` of site hostnames to API tokens.
 - **jq** (used to parse the JSON config and for Slack payloads).
 
+To run monitoring in a Docker container (e.g. on a 24/7 device) and exec in to run these scripts, see the **Docker (24/7 monitoring)** section in the main [README](../README.md).
+
 ## audit_db_status_all_sites.sh
 
 Runs `fluency audit db_status` for **every site** in `site_credentials.json` and reports which sites are up or down.

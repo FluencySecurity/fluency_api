@@ -1,0 +1,10 @@
+.git
+.gitignore
+.env
+site_credentials.json
+ui/
+docs/
+*.md
+!scripts/README.md
+.cursor
+*.plan.md

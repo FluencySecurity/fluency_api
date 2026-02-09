@@ -1,0 +1,11 @@
+services:
+  monitoring:
+    build: .
+    image: fluency-monitoring
+    container_name: fluency-monitoring
+    env_file: .env
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+    volumes:
+      - ./site_credentials.json:/app/site_credentials.json:ro
+    restart: unless-stopped

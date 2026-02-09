@@ -223,6 +223,39 @@ The `scripts/` directory contains automation that calls the CLI for all sites in
 - **`audit_db_status_all_sites.sh`** – Runs `fluency audit db_status` for every site and reports which are up or down. Custom “down” criteria can be added in the script. Requires **jq**. See `scripts/README.md` for usage.
 - **`audit_db_status_slack_alert.sh`** – Runs the db_status check and, if any site is down, sends an alert to a Slack webhook (configure via `SLACK_WEBHOOK_URL` or `--slack-webhook-url`).
 
+### Docker (24/7 monitoring)
+
+You can run the monitoring scripts in a container on a device that is always on. The image runs cron every 2 hours to execute `start_monitoring.sh` and keeps the container up so you can exec in to debug or run other scripts.
+
+**Build:**
+
+```bash
+docker build -t fluency-monitoring .
+```
+
+**Run 24/7:**
+
+```bash
+docker run -d --name fluency-monitoring \
+  -e SLACK_WEBHOOK_URL='https://hooks.slack.com/services/...' \
+  -v /host/path/site_credentials.json:/app/site_credentials.json:ro \
+  fluency-monitoring
+```
+
+Or with docker-compose (from repo root, with `.env` containing `SLACK_WEBHOOK_URL` and `site_credentials.json` present):
+
+```bash
+docker compose up -d
+```
+
+**Exec in to debug or run scripts:**
+
+```bash
+docker exec -it fluency-monitoring /bin/bash
+```
+
+Then from inside the container you can run `/app/scripts/start_monitoring.sh`, individual alert scripts (e.g. `/app/scripts/platform_status_slack_alert.sh --slack-webhook-url "$SLACK_WEBHOOK_URL"`), or any other script. Working directory is `/app`; `site_credentials.json` must be mounted at `/app/site_credentials.json` when starting the container.
+
 ## Development
 
 ### Project Structure
