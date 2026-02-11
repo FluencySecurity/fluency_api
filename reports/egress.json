@@ -1,0 +1,24 @@
+{
+  "entry": {
+    "name": "Billing Report",
+    "reportConfig": {
+      "panels": [],
+      "layout": []
+    },
+    "arguments": [
+      {
+        "name": "from",
+        "defaultValue": "-1d@d",
+        "optional": true,
+        "type": "string"
+      },
+      {
+        "name": "to",
+        "defaultValue": "@d",
+        "optional": true,
+        "type": "string"
+      }
+    ],
+    "fpl": "function main({from=\"-1d@d\", to=\"@d\"}) {\n    setEnv(\"from\", from)\n    setEnv(\"to\", to)\n    let data_ingress = Platform_Metric_Query(Platform_Metric_QueryBuild(queryOptions(\"platform_egress_bytes\", from, to)), to)\n    let count_ingress = Platform_Metric_Query(Platform_Metric_QueryBuild(queryOptions(\"platform_egress_count\", from, to)), to)\n\n    return {data_ingress, count_ingress}\n}\n\nfunction queryOptions(metric, timeFrom, timeTo) {\n    let timeFrom = new Time(timeFrom)\n    let timeTo = new Time(timeTo)\n    let days = (timeTo.Unix() - timeFrom.Unix()) / 86400\n    return {\n        metric: metric,\n        select: \"\",\n        duration: `${days}d`,\n        stat: \"increase\",\n        aggregate:\"sum\",\n        groupBy: []\n    }\n}\n"
+  }
+}

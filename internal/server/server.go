@@ -36,6 +36,8 @@ func (s *Server) routeDefinitions() []routeDef {
 		{"GET", "/api/eventwatch/summary-search", "EventWatch summary search", s.eventwatchSummarySearch},
 		{"GET", "/api/eventwatch/timeline-search", "EventWatch timeline search", s.eventwatchTimelineSearch},
 		{"GET", "/api/eventwatch/rule-search", "EventWatch rule search", s.eventwatchRuleSearch},
+		{"GET", "/api/collector/list", "List collectors (CollectorForWeb)", s.collectorList},
+		{"POST", "/api/collector/status", "Collector status (body: collector, cargs)", s.collectorStatus},
 		{"GET", "/api/audit/search", "Audit search", s.auditSearch},
 		{"GET", "/api/audit/db_status", "DB status (audit)", s.auditDbStatus},
 		{"GET", "/api/datalake", "List datalakes", s.datalakeList},
