@@ -19,8 +19,8 @@ RUN echo '#!/bin/sh' > /app/scripts/run_monitoring.sh \
     && echo 'cd /app && /app/scripts/start_monitoring.sh --site-config /app/site_credentials.json --fluency /app/fluency' >> /app/scripts/run_monitoring.sh \
     && chmod +x /app/scripts/run_monitoring.sh
 
-# Cron: run monitoring every 2 hours (at :00)
-RUN echo '0 */2 * * * /app/scripts/run_monitoring.sh' | crontab -
+# Cron: run monitoring every 1 hours (at :00)
+RUN echo '0 */1 * * * /app/scripts/run_monitoring.sh' | crontab -
 
 # At startup: write env for cron jobs, then run crond in foreground
 COPY docker-entrypoint.sh /docker-entrypoint.sh
