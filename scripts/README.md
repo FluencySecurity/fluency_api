@@ -212,6 +212,106 @@ export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
 
 ---
 
+## collector_status_all.sh
+
+Runs `fluency collector list`, then gets status for each collector using `fluency collector status --collector <name>`. Reports which collectors succeed or fail.
+
+### Usage
+
+```bash
+# From repo root (uses ./site_credentials.json)
+./scripts/collector_status_all.sh
+
+# With specific site
+./scripts/collector_status_all.sh --site-config /path/to/site_credentials.json --site <site-name>
+
+# Custom fluency binary
+./scripts/collector_status_all.sh --fluency ./fluency
+
+# Verbose: print full status output for each collector
+./scripts/collector_status_all.sh -v
+```
+
+### Exit codes
+
+- `0` – All collectors OK (status retrieved successfully).
+- `1` – One or more collectors failed (API error); see stderr for list.
+- `2` – Script error (missing config, failed to list collectors, etc.).
+
+---
+
+## collector_status_email_alert.sh
+
+Runs `collector_status_all.sh`; if any collector has errors (exit code non-zero), sends an **SMTP email alert** with the list of failed collectors and their errors.
+
+### Prerequisites
+
+- Everything required for `collector_status_all.sh` (fluency, site_credentials.json).
+- **python3** (with smtplib module - standard library).
+- SMTP server configuration (host, port, from/to addresses, optionally username/password).
+
+### Configuring SMTP
+
+Use either environment variables or CLI flags:
+
+**Environment variables:**
+- `SMTP_HOST` – SMTP server hostname (required)
+- `SMTP_PORT` – SMTP server port (default: 587)
+- `SMTP_USER` – SMTP username (optional, for authenticated SMTP)
+- `SMTP_PASS` – SMTP password (optional, for authenticated SMTP)
+- `SMTP_FROM` – From email address (required)
+- `SMTP_TO` – To email address (required)
+- `SMTP_FROM_NAME` – From name (default: "Fluency Collector Monitor")
+- `SMTP_USE_STARTTLS` – Set to `0` to disable STARTTLS (if your server does not support it)
+
+**CLI flags:**
+- `--smtp-host HOST`
+- `--smtp-port PORT`
+- `--smtp-user USER`
+- `--smtp-pass PASS`
+- `--smtp-from EMAIL`
+- `--smtp-to EMAIL`
+- `--smtp-from-name NAME`
+- `--smtp-no-starttls` – Disable STARTTLS (if server does not support it)
+
+### Usage
+
+```bash
+# Using environment variables
+export SMTP_HOST="smtp.example.com"
+export SMTP_PORT="587"
+export SMTP_USER="user@example.com"
+export SMTP_PASS="password"
+export SMTP_FROM="alerts@example.com"
+export SMTP_TO="admin@example.com"
+./scripts/collector_status_email_alert.sh
+
+# Using CLI flags
+./scripts/collector_status_email_alert.sh \
+  --smtp-host smtp.example.com \
+  --smtp-port 587 \
+  --smtp-user user@example.com \
+  --smtp-pass password \
+  --smtp-from alerts@example.com \
+  --smtp-to admin@example.com
+
+# With collector status script options (passed through)
+./scripts/collector_status_email_alert.sh \
+  --smtp-host smtp.example.com \
+  --smtp-from alerts@example.com \
+  --smtp-to admin@example.com \
+  --site-config /path/to/site_credentials.json \
+  --site <site-name> \
+  -v
+```
+
+### Exit codes
+
+- Same as `collector_status_all.sh`: `0` = all OK, `1` = one or more collectors failed, `2` = script/config error (including missing SMTP config).
+- When exit is `1`, the script sends an email and then exits 1.
+
+---
+
 ## billing_run_all_sites.sh
 
 Runs the billing FPL report for every site in `site_credentials.json`, polls until completed (or aborted), then writes results to a CSV. See script header for details.
