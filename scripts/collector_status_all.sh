@@ -91,9 +91,9 @@ validate_collector_json() {
     [[ -n "$line" ]] && errors+=("$line")
   done < <(jq -r '.files // {} | to_entries[] | select(.value | startswith("ls")) | "\(.key): `\(.value | gsub("\n"; " ") | gsub("`"; "'"'"'") )`"' <<< "$output" 2>/dev/null)
 
-  # 4. Files: value not starting with "ls" (ls -l output) – check if file date is older than 1 day
+  # 4. Files: value not starting with "ls" (ls -l output) – check if file date is older than 1 day (compare in UTC)
   local now_epoch file_epoch date_part fkey fval
-  now_epoch=$(date +%s 2>/dev/null) || now_epoch=0
+  now_epoch=$(TZ=UTC date +%s 2>/dev/null) || now_epoch=0
   while IFS= read -r line; do
     [[ -z "$line" ]] && continue
     fkey="${line%%$'\t'*}"
@@ -104,9 +104,10 @@ validate_collector_json() {
       date_part=$(echo "$fval" | grep -oE '[A-Za-z]{3} +[0-9]{1,2} +[0-9]{4}' | head -1)
     fi
     if [[ -n "$date_part" && "$now_epoch" -gt 0 ]]; then
-      file_epoch=$(date -d "$date_part" "+%s" 2>/dev/null) || file_epoch=$(date -j -f "%b %d %H:%M" "$date_part" "+%s" 2>/dev/null)
+      # Parse file date as UTC to get UTC epoch for comparison
+      file_epoch=$(TZ=UTC date -d "$date_part" "+%s" 2>/dev/null) || file_epoch=$(TZ=UTC date -j -f "%b %d %H:%M" "$date_part" "+%s" 2>/dev/null)
       if [[ -z "$file_epoch" ]]; then
-        file_epoch=$(date -j -f "%b %d %Y" "$date_part" "+%s" 2>/dev/null)
+        file_epoch=$(TZ=UTC date -j -f "%b %d %Y" "$date_part" "+%s" 2>/dev/null)
       fi
       if [[ -n "$file_epoch" && $((now_epoch - file_epoch)) -gt 86400 ]]; then
         errors+=("$fkey: file not accessed in the past day")

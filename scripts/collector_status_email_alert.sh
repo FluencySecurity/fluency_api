@@ -13,11 +13,16 @@ SMTP_TO="${SMTP_TO:-}"
 SMTP_FROM_NAME="${SMTP_FROM_NAME:-Fluency Collector Monitor}"
 # Set to 0 or use --smtp-no-starttls if the server does not support STARTTLS
 SMTP_USE_STARTTLS="${SMTP_USE_STARTTLS:-1}"
+BODY_FILE=""
 PASS_ARGS=()
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --body-file)
+      BODY_FILE="$2"
+      shift 2
+      ;;
     --smtp-no-starttls)
       SMTP_USE_STARTTLS="0"
       shift
@@ -66,6 +71,7 @@ while [[ $# -gt 0 ]]; do
       echo "  --smtp-to EMAIL        To email address (SMTP_TO)"
       echo "  --smtp-from-name NAME  From name (default: 'Fluency Collector Monitor', SMTP_FROM_NAME)"
       echo "  --smtp-no-starttls     Disable STARTTLS (use if server does not support it; or SMTP_USE_STARTTLS=0)"
+      echo "  --body-file PATH       Write email body to this file (default: /tmp/collector_status_<timestamp>.txt)"
       echo ""
       echo "Collector status script options (passed through):"
       echo "  --site-config PATH     Path to site_credentials.json"
@@ -119,6 +125,11 @@ Run from: $(hostname) at $(date -u +"%Y-%m-%d %H:%M:%S UTC")
 ---
 Full output:
 ${output}"
+
+# Write body to file (default: /tmp/collector_status_<timestamp>.txt)
+body_file="${BODY_FILE:-/tmp/collector_status_$(date +%Y%m%d-%H%M%S).txt}"
+printf '%s' "$body" > "$body_file"
+echo "Email body written to: $body_file" >&2
 
 # Send email using Python smtplib
 if ! command -v python3 &>/dev/null; then
