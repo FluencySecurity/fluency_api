@@ -23,17 +23,17 @@ func (s *EventWatchService) call(function string, payload interface{}, out inter
 func (s *EventWatchService) SummarySearch(searchString string, rangeFrom, rangeTo int64) (*model.ElasticSearchResult, error) {
 	req := &ElasticSearchRequest{
 		Options: &SimpleSearchOption{
-			SearchStr: searchString,
-			RangeFrom: rangeFrom,
-			RangeTo:   rangeTo,
-			RangeField: "from",
-			FetchLimit: 100,
+			SearchStr:   searchString,
+			RangeFrom:   rangeFrom,
+			RangeTo:     rangeTo,
+			RangeField:  "from",
+			FetchLimit:  100,
 			FetchOffset: 0,
-			SortField: "to",
-			SortOrder: "desc",
+			SortField:   "to",
+			SortOrder:   "desc",
 			Facets: &FacetsOption{
-				Facets: []*FacetEntry{},
-				MustFilters: []*FilterEntry{},
+				Facets:         []*FacetEntry{},
+				MustFilters:    []*FilterEntry{},
 				MustNotFilters: []*FilterEntry{},
 			},
 		},
@@ -49,17 +49,17 @@ func (s *EventWatchService) SummarySearch(searchString string, rangeFrom, rangeT
 func (s *EventWatchService) TimelineSearch(searchString string, rangeFrom, rangeTo int64) (*model.ElasticSearchResult, error) {
 	req := &ElasticSearchRequest{
 		Options: &SimpleSearchOption{
-			SearchStr: searchString,
-			RangeFrom: rangeFrom,
-			RangeTo:   rangeTo,
-			RangeField: "timestamp",
-			FetchLimit: 100,
+			SearchStr:   searchString,
+			RangeFrom:   rangeFrom,
+			RangeTo:     rangeTo,
+			RangeField:  "timestamp",
+			FetchLimit:  100,
 			FetchOffset: 0,
-			SortField: "timestamp",
-			SortOrder: "desc",
+			SortField:   "timestamp",
+			SortOrder:   "desc",
 			Facets: &FacetsOption{
-				Facets: []*FacetEntry{},
-				MustFilters: []*FilterEntry{},
+				Facets:         []*FacetEntry{},
+				MustFilters:    []*FilterEntry{},
 				MustNotFilters: []*FilterEntry{},
 			},
 		},
@@ -75,11 +75,11 @@ func (s *EventWatchService) TimelineSearch(searchString string, rangeFrom, range
 func (s *EventWatchService) RuleSearch(searchString string) (*model.ElasticSearchResult, error) {
 	req := &ElasticSearchRequest{
 		Options: &SimpleSearchOption{
-			SearchStr:  searchString,
-			FetchLimit: 100,
+			SearchStr:   searchString,
+			FetchLimit:  100,
 			FetchOffset: 0,
-			SortField:  "name",
-			SortOrder:  "asc",
+			SortField:   "name",
+			SortOrder:   "asc",
 			Facets: &FacetsOption{
 				Facets:         []*FacetEntry{},
 				MustFilters:    []*FilterEntry{},
@@ -95,6 +95,7 @@ func (s *EventWatchService) RuleSearch(searchString string) (*model.ElasticSearc
 }
 
 type ElasticSearchRequest struct {
-	Options *SimpleSearchOption `json:"options,omitempty"`
+	Options   *SimpleSearchOption `json:"options,omitempty"`
+	Partition string              `json:"partition,omitempty"`
+	DataType  string              `json:"dataType,omitempty"`
 }
-

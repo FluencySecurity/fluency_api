@@ -35,7 +35,7 @@ func ApiCall(client *client.FluencyClient, function string, payload interface{},
 		return err
 	}
 	if err := json.Unmarshal(res.GetBytes(), out); err != nil {
-		fmt.Errorf("Error parsing %s response: %v\n", function, err.Error())
+		fmt.Fprintf(os.Stderr, "Error parsing %s response: %v\n", function, err.Error())
 		return err
 	}
 	return nil
@@ -226,15 +226,17 @@ type PlatformMetricsResponse struct {
 }
 
 type SimpleSearchOption struct {
-	SearchStr   string        `json:"searchStr,omitempty"`
-	FetchOffset int           `json:"fetchOffset"`
-	FetchLimit  int           `json:"fetchLimit"`
-	SortField   string        `json:"sortField,omitempty"`
-	SortOrder   string        `json:"sortOrder,omitempty"`
-	Facets      *FacetsOption `json:"facets,omitempty"`
-	RangeFrom   int64         `json:"range_from,omitempty"`
-	RangeTo     int64         `json:"range_to,omitempty"`
-	RangeField  string        `json:"range_field,omitempty"`
+	DataType       string        `json:"dataType,omitempty"`
+	SearchStr      string        `json:"searchStr"`
+	DateFacetField string        `json:"dateFacetField,omitempty"`
+	FetchOffset    int           `json:"fetchOffset"`
+	FetchLimit     int           `json:"fetchLimit"`
+	SortField      string        `json:"sortField,omitempty"`
+	SortOrder      string        `json:"sortOrder,omitempty"`
+	Facets         *FacetsOption `json:"facets,omitempty"`
+	RangeFrom      int64         `json:"range_from,omitempty"`
+	RangeTo        int64         `json:"range_to,omitempty"`
+	RangeField     string        `json:"range_field,omitempty"`
 }
 
 type FacetEntry struct {
@@ -421,7 +423,7 @@ type ListConfigsResponse struct {
 	Sinks        []*model.DataSinkConfig      `json:"sinks"`
 	Routers      []*model.RouterConfig        `json:"routers"`
 	Pipes        []*model.StreamPipeConfig    `json:"pipes"`
-	Metrics      []*ComponentStat                       `json:"metrics"`
+	Metrics      []*ComponentStat             `json:"metrics"`
 	Channels     []*model.ChannelConfig       `json:"channels"`
 	Connections  []*model.RouterInput         `json:"connections"`
 	Integrations []*model.Integration         `json:"integrations"`
