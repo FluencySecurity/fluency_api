@@ -39,3 +39,14 @@ func (c *Client) RuleSearch(searchString string) (*model.ElasticSearchResult, er
 	}
 	return resp, nil
 }
+
+// RuleTest calls /api/ds/eventwatch_rule_test to check if an input event matches the given bucket.
+func (c *Client) RuleTest(bucket model.EventWatchBucket, input map[string]interface{}) (bool, error) {
+	svc := fluencyAPI.NewEventWatchService(c.fluencyClient)
+	resp, err := svc.RuleTest(bucket, input)
+	if err != nil {
+		c.Logger.Error("failed to run rule test", "error", err)
+		return false, fmt.Errorf("failed to run rule test: %w", err)
+	}
+	return resp.Hit, nil
+}

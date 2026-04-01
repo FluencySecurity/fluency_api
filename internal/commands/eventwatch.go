@@ -2,6 +2,8 @@ package commands
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/SecurityDo/fluency_api/model"
@@ -9,9 +11,11 @@ import (
 )
 
 var (
-	eventwatchQuery string
-	eventwatchFrom  int64
-	eventwatchTo    int64
+	eventwatchQuery     string
+	eventwatchFrom      int64
+	eventwatchTo        int64
+	ruleTestBucketFile  string
+	ruleTestInputFile   string
 )
 
 var eventwatchCmd = &cobra.Command{
@@ -67,6 +71,43 @@ var eventwatchRuleSearchCmd = &cobra.Command{
 	},
 }
 
+var eventwatchRuleTestCmd = &cobra.Command{
+	Use:   "rule_test",
+	Short: "Test whether an input event matches a bucket rule",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		bucketData, err := os.ReadFile(ruleTestBucketFile)
+		if err != nil {
+			return fmt.Errorf("failed to read bucket file: %w", err)
+		}
+		if !json.Valid(bucketData) {
+			return fmt.Errorf("bucket file %q is not valid JSON", ruleTestBucketFile)
+		}
+		var bucket model.EventWatchBucket
+		if err := json.Unmarshal(bucketData, &bucket); err != nil {
+			return fmt.Errorf("bucket file %q is not a valid JSON object: %w", ruleTestBucketFile, err)
+		}
+
+		inputData, err := os.ReadFile(ruleTestInputFile)
+		if err != nil {
+			return fmt.Errorf("failed to read input file: %w", err)
+		}
+		if !json.Valid(inputData) {
+			return fmt.Errorf("input file %q is not valid JSON", ruleTestInputFile)
+		}
+		var input map[string]interface{}
+		if err := json.Unmarshal(inputData, &input); err != nil {
+			return fmt.Errorf("input file %q is not a valid JSON object: %w", ruleTestInputFile, err)
+		}
+
+		hit, err := AppAPI.RuleTest(bucket, input)
+		if err != nil {
+			return err
+		}
+		cmd.Printf("hit: %v\n", hit)
+		return nil
+	},
+}
+
 func printEventwatchHits(cmd *cobra.Command, resp *model.ElasticSearchResult, sourceType string) error {
 	if resp.Hits == nil || len(resp.Hits.Hits) == 0 {
 		cmd.PrintErrln("No hits found.")
@@ -104,7 +145,7 @@ func printEventwatchHits(cmd *cobra.Command, resp *model.ElasticSearchResult, so
 
 func init() {
 	RootCmd.AddCommand(eventwatchCmd)
-	eventwatchCmd.AddCommand(eventwatchSummarySearchCmd, eventwatchTimelineSearchCmd, eventwatchRuleSearchCmd)
+	eventwatchCmd.AddCommand(eventwatchSummarySearchCmd, eventwatchTimelineSearchCmd, eventwatchRuleSearchCmd, eventwatchRuleTestCmd)
 
 	eventwatchSummarySearchCmd.Flags().StringVar(&eventwatchQuery, "query", "", "Search query")
 	eventwatchSummarySearchCmd.Flags().Int64Var(&eventwatchFrom, "from", 0, "Range start (Unix ms); default: 1 hour ago")
@@ -115,4 +156,9 @@ func init() {
 	eventwatchTimelineSearchCmd.Flags().Int64Var(&eventwatchTo, "to", 0, "Range end (Unix ms); default: now")
 
 	eventwatchRuleSearchCmd.Flags().StringVar(&eventwatchQuery, "query", "", "Search query")
+
+	eventwatchRuleTestCmd.Flags().StringVar(&ruleTestBucketFile, "bucket", "", "Path to JSON file containing the EventWatchBucket")
+	eventwatchRuleTestCmd.Flags().StringVar(&ruleTestInputFile, "input", "", "Path to JSON file containing the input event")
+	eventwatchRuleTestCmd.MarkFlagRequired("bucket")
+	eventwatchRuleTestCmd.MarkFlagRequired("input")
 }

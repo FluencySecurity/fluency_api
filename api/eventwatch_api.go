@@ -94,6 +94,28 @@ func (s *EventWatchService) RuleSearch(searchString string) (*model.ElasticSearc
 	return &resp, nil
 }
 
+type RuleTestRequest struct {
+	Bucket model.EventWatchBucket `json:"bucket"`
+	Input  map[string]interface{} `json:"input"`
+}
+
+type RuleTestResponse struct {
+	Hit bool `json:"hit"`
+}
+
+// RuleTest calls /api/ds/eventwatch_rule_test to check if the input matches the given bucket.
+func (s *EventWatchService) RuleTest(bucket model.EventWatchBucket, input map[string]interface{}) (*RuleTestResponse, error) {
+	req := &RuleTestRequest{
+		Bucket: bucket,
+		Input:  input,
+	}
+	var resp RuleTestResponse
+	if err := s.call("eventwatch_rule_test", req, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
 type ElasticSearchRequest struct {
 	Options   *SimpleSearchOption `json:"options,omitempty"`
 	Partition string              `json:"partition,omitempty"`

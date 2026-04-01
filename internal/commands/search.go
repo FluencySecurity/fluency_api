@@ -53,9 +53,13 @@ var searchCmd = &cobra.Command{
 		}
 		defer f.Close()
 
+		sources := make([]json.RawMessage, 0, len(resp.Hits.Hits))
+		for _, hit := range resp.Hits.Hits {
+			sources = append(sources, hit.Source)
+		}
 		enc := json.NewEncoder(f)
 		enc.SetIndent("", "  ")
-		if err := enc.Encode(resp.Hits.Hits); err != nil {
+		if err := enc.Encode(sources); err != nil {
 			return fmt.Errorf("failed to write results: %w", err)
 		}
 
