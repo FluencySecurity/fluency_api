@@ -18,7 +18,16 @@ func NewSearchService(client *client.FluencyClient) *SearchService {
 }
 
 // IndexZoomHistogramLv3 calls /api/ds/get_index_zoom_histogram_lv3 with the given search string and time range.
-func (s *SearchService) IndexZoomHistogramLv3(searchString string, rangeFrom, rangeTo int64) (*model.ElasticSearchResult, error) {
+func (s *SearchService) IndexZoomHistogramLv3(searchString string, rangeFrom, rangeTo int64, mustFilters, mustNotFilters []*FilterEntry, facets []*FacetEntry) (*model.ElasticSearchResult, error) {
+	if mustFilters == nil {
+		mustFilters = []*FilterEntry{}
+	}
+	if mustNotFilters == nil {
+		mustNotFilters = []*FilterEntry{}
+	}
+	if facets == nil {
+		facets = []*FacetEntry{}
+	}
 	req := &ElasticSearchRequest{
 		Partition: "default",
 		DataType:  "event",
@@ -33,9 +42,9 @@ func (s *SearchService) IndexZoomHistogramLv3(searchString string, rangeFrom, ra
 			SortField:      "@timestamp",
 			SortOrder:      "desc",
 			Facets: &FacetsOption{
-				Facets:         []*FacetEntry{},
-				MustFilters:    []*FilterEntry{},
-				MustNotFilters: []*FilterEntry{},
+				Facets:         facets,
+				MustFilters:    mustFilters,
+				MustNotFilters: mustNotFilters,
 			},
 		},
 	}
